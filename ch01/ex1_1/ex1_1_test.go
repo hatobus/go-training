@@ -31,6 +31,7 @@ func TestEx1_1echo(t *testing.T) {
 		t.Run(testName, func(t *testing.T){
 			os.Args = tc.Args
 
+			// この方法だと実行ファイルが取れない
 			out := pioutil.OutputCapture(func() {
 				main()
 			})
