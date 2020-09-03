@@ -1,4 +1,4 @@
-package main
+package ex2_3
 
 import (
 	"github.com/hatobus/go-training/ch02/ex2_3/popcount"

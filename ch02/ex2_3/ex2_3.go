@@ -1,4 +1,4 @@
-package main
+package ex2_3
 
 var pc [256]byte
 
