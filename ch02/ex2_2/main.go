@@ -7,7 +7,7 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/hatobus/go-training/ch03/unitconv"
+	"github.com/hatobus/go-training/ch02/ex2_2/unitconv"
 )
 
 var (
