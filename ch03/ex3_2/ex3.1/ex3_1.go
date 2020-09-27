@@ -37,7 +37,7 @@ func main() {
 
 func validateNumericValue(values ...float64) bool {
 	for _, v := range values {
-		if math.IsInf(v, 0) {
+		if math.IsInf(v, 0) || math.IsNaN(v) {
 			return false
 		}
 	}

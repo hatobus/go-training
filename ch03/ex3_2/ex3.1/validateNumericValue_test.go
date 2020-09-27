@@ -26,6 +26,10 @@ func TestValidateNumericValue(t *testing.T) {
 			values: append(origin, math.Inf(-1)),
 			isValid: false,
 		},
+		"NaNの場合": {
+			values: append(origin, math.NaN()),
+			isValid: false,
+		},
 	}
 
 	for testName, tc := range testCases {
