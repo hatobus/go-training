@@ -11,11 +11,11 @@ import (
 )
 
 const (
-	width, height = 600, 320            // canvas size in pixels
+	Width, Height = 600, 320            // canvas size in pixels
 	cells         = 100                 // number of grid cells
 	xyrange       = 30.0                // axis ranges (-xyrange..+xyrange)
-	xyscale       = width / 2 / xyrange // pixels per x or y unit
-	zscale        = height * 0.4        // pixels per z unit
+	xyscale       = Width / 2 / xyrange // pixels per x or y unit
+	zscale        = Height * 0.4        // pixels per z unit
 	angle         = math.Pi / 6         // angle of x, y axes (=30°)
 )
 
@@ -26,12 +26,12 @@ func main() {
 	// height, width, color を指定できる
 	// colorは配列で渡され、山が1番目、谷が2番目の要素で描かれる
 	// color="yellow,purple" の場合には山が黄色、谷が紫
-	http.HandleFunc("/", generateSVGHandler)
+	http.HandleFunc("/", GenerateSVGHandler)
 
 	log.Fatal(http.ListenAndServe("localhost:8080", nil))
 }
 
-func generateSVGHandler(w http.ResponseWriter, r *http.Request) {
+func GenerateSVGHandler(w http.ResponseWriter, r *http.Request) {
 	strheight := r.URL.Query().Get("height")
 	strwidth := r.URL.Query().Get("width")
 
@@ -44,12 +44,14 @@ func generateSVGHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if strheight == "" {
-		strheight = strconv.Itoa(height)
+		strheight = strconv.Itoa(Height)
 	}
 
 	if strwidth == "" {
-		strwidth = strconv.Itoa(width)
+		strwidth = strconv.Itoa(Width)
 	}
+
+	w.WriteHeader(http.StatusCreated)
 
 	height, err := strconv.Atoi(strheight)
 	if err != nil || height <= 0 {
@@ -68,7 +70,7 @@ func generateSVGHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = genSVG(w, height, width, colors)
+	err = GenSVG(w, height, width, colors)
 	if err != nil {
 		log.Println(err)
 		http.Error(w, "svg generate failed", http.StatusInternalServerError)
@@ -76,11 +78,10 @@ func generateSVGHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "image/svg+xml")
-	w.WriteHeader(http.StatusCreated)
 	return
 }
 
-func genSVG(w io.Writer,height, width int, colors []string) error {
+func GenSVG(w io.Writer,height, width int, colors []string) error {
 	_, err := fmt.Fprintf(w, "<svg xmlns='http://www.w3.org/2000/svg' "+
 		"style='stroke: grey; fill: white; stroke-width: 0.7' "+
 		"width='%d' height='%d'>", width, height)
@@ -157,8 +158,8 @@ func corner(i, j int) (float64, float64) {
 	z := f(x, y)
 
 	// Project (x,y,z) isometrically onto 2-D SVG canvas (sx,sy).
-	sx := width/2 + (x-y)*cos30*xyscale
-	sy := height/2 + (x+y)*sin30*xyscale - z*zscale
+	sx := Width/2 + (x-y)*cos30*xyscale
+	sy := Height/2 + (x+y)*sin30*xyscale - z*zscale
 	return sx, sy
 }
 

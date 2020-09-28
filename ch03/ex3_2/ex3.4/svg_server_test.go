@@ -1,4 +1,4 @@
-package main
+package main_test
 
 import (
 	"bytes"
@@ -8,19 +8,21 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	ex34 "github.com/hatobus/go-training/ch03/ex3_2/ex3.4"
 )
 
 var defaultColor = []string{"red", "blue"}
 
 func getSVGHandler() http.HandlerFunc {
-	return generateSVGHandler
+	return ex34.GenerateSVGHandler
 }
 
 func prepareSVGData(t testing.TB ,height, width int, colors []string) string {
 	t.Helper()
 
 	d := new(bytes.Buffer)
-	err := genSVG(d, height, width, colors)
+	err := ex34.GenSVG(d, height, width, colors)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -44,7 +46,21 @@ func TestSVGServer(t *testing.T) {
 			width: "",
 			colors: []string{},
 			wantStatusCode: http.StatusCreated,
-			apiOut: prepareSVGData(t, height, width, defaultColor),
+			apiOut: prepareSVGData(t, ex34.Height, ex34.Width, defaultColor),
+		},
+		"height 300 width 800": {
+			height: "300",
+			width: "800",
+			colors: []string{},
+			wantStatusCode: http.StatusCreated,
+			apiOut: prepareSVGData(t, 300, 800, defaultColor),
+		},
+		"colorを指定する": {
+			height: "",
+			width: "",
+			colors: []string{"yellow", "green"},
+			wantStatusCode: http.StatusCreated,
+			apiOut: prepareSVGData(t, ex34.Height, ex34.Width, []string{"yellow", "green"}),
 		},
 		"heightがマイナス": {
 			height: "-1",
@@ -53,6 +69,22 @@ func TestSVGServer(t *testing.T) {
 			wantStatusCode: http.StatusBadRequest,
 			wantErr: true,
 			apiOut: "invalid height value\n",
+		},
+		"widthがマイナス": {
+			height: "",
+			width: "-1",
+			colors: []string{},
+			wantStatusCode: http.StatusBadRequest,
+			wantErr: true,
+			apiOut: "invalid width value\n",
+		},
+		"colorが多い": {
+			height: "",
+			width: "",
+			colors: []string{"blue", "yellow", "green"},
+			wantStatusCode: http.StatusBadRequest,
+			wantErr: true,
+			apiOut: "invalid color, length must be 2\n",
 		},
 	}
 
