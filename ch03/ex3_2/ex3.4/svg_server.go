@@ -26,56 +26,58 @@ func main() {
 	// height, width, color を指定できる
 	// colorは配列で渡され、山が1番目、谷が2番目の要素で描かれる
 	// color="yellow,purple" の場合には山が黄色、谷が紫
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		strheight := r.URL.Query().Get("height")
-		strwidth := r.URL.Query().Get("width")
-
-		var colors []string
-		color := r.URL.Query().Get("color")
-		if color != "" {
-			colors = strings.Split(color, ",")
-		} else {
-			colors = []string{"red", "blue"}
-		}
-
-		if strheight == "" {
-			strheight = strconv.Itoa(height)
-		}
-
-		if strwidth == "" {
-			strwidth = strconv.Itoa(width)
-		}
-
-		height, err := strconv.Atoi(strheight)
-		if err != nil {
-			http.Error(w, "invalid height value", http.StatusBadRequest)
-			return
-		}
-
-		width, err := strconv.Atoi(strwidth)
-		if err != nil {
-			http.Error(w, "invalid width value", http.StatusBadRequest)
-			return
-		}
-
-		if len(colors) != 2 {
-			http.Error(w, "invalid color, length must be 2", http.StatusBadRequest)
-			return
-		}
-
-		err = genSVG(w, height, width, colors)
-		if err != nil {
-			log.Println(err)
-			http.Error(w, "svg generate failed", http.StatusInternalServerError)
-			return
-		}
-
-		w.Header().Set("Content-Type", "image/svg+xml")
-		w.WriteHeader(http.StatusCreated)
-		return
-	})
+	http.HandleFunc("/", generateSVGHandler)
 
 	log.Fatal(http.ListenAndServe("localhost:8080", nil))
+}
+
+func generateSVGHandler(w http.ResponseWriter, r *http.Request) {
+	strheight := r.URL.Query().Get("height")
+	strwidth := r.URL.Query().Get("width")
+
+	var colors []string
+	color := r.URL.Query().Get("color")
+	if color != "" {
+		colors = strings.Split(color, ",")
+	} else {
+		colors = []string{"red", "blue"}
+	}
+
+	if strheight == "" {
+		strheight = strconv.Itoa(height)
+	}
+
+	if strwidth == "" {
+		strwidth = strconv.Itoa(width)
+	}
+
+	height, err := strconv.Atoi(strheight)
+	if err != nil || height <= 0 {
+		http.Error(w, "invalid height value", http.StatusBadRequest)
+		return
+	}
+
+	width, err := strconv.Atoi(strwidth)
+	if err != nil || width <= 0 {
+		http.Error(w, "invalid width value", http.StatusBadRequest)
+		return
+	}
+
+	if len(colors) != 2 {
+		http.Error(w, "invalid color, length must be 2", http.StatusBadRequest)
+		return
+	}
+
+	err = genSVG(w, height, width, colors)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "svg generate failed", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "image/svg+xml")
+	w.WriteHeader(http.StatusCreated)
+	return
 }
 
 func genSVG(w io.Writer,height, width int, colors []string) error {
