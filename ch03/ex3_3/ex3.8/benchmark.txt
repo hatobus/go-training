@@ -1,0 +1,9 @@
+goos: darwin
+goarch: amd64
+pkg: github.com/hatobus/go-training/ch03/ex3_3/ex3.8
+BenchmarkComplex64-8    	45238633	        25.8 ns/op
+BenchmarkComplex128-8   	51876966	        23.2 ns/op
+BenchmarkBigFloat-8     	 2418739	       486 ns/op
+BenchmarkRat-8          	  628843	      1808 ns/op
+PASS
+ok  	github.com/hatobus/go-training/ch03/ex3_3/ex3.8	6.253s
