@@ -2,12 +2,13 @@ package main_test
 
 import (
 	"bytes"
-	"github.com/google/go-cmp/cmp"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/google/go-cmp/cmp"
 
 	ex34 "github.com/hatobus/go-training/ch03/ex3_2/ex3.4"
 )
@@ -18,7 +19,7 @@ func getSVGHandler() http.HandlerFunc {
 	return ex34.GenerateSVGHandler
 }
 
-func prepareSVGData(t testing.TB ,height, width int, colors []string) string {
+func prepareSVGData(t testing.TB, height, width int, colors []string) string {
 	t.Helper()
 
 	d := new(bytes.Buffer)
@@ -32,59 +33,59 @@ func prepareSVGData(t testing.TB ,height, width int, colors []string) string {
 
 func TestSVGServer(t *testing.T) {
 	type testData struct {
-		height string
-		width string
-		colors []string
+		height         string
+		width          string
+		colors         []string
 		wantStatusCode int
-		wantErr bool
-		apiOut string
+		wantErr        bool
+		apiOut         string
 	}
 
-	testCases := map[string]testData {
+	testCases := map[string]testData{
 		"通常時(何も指定しない)": {
-			height: "",
-			width: "",
-			colors: []string{},
+			height:         "",
+			width:          "",
+			colors:         []string{},
 			wantStatusCode: http.StatusCreated,
-			apiOut: prepareSVGData(t, ex34.Height, ex34.Width, defaultColor),
+			apiOut:         prepareSVGData(t, ex34.Height, ex34.Width, defaultColor),
 		},
 		"height 300 width 800": {
-			height: "300",
-			width: "800",
-			colors: []string{},
+			height:         "300",
+			width:          "800",
+			colors:         []string{},
 			wantStatusCode: http.StatusCreated,
-			apiOut: prepareSVGData(t, 300, 800, defaultColor),
+			apiOut:         prepareSVGData(t, 300, 800, defaultColor),
 		},
 		"colorを指定する": {
-			height: "",
-			width: "",
-			colors: []string{"yellow", "green"},
+			height:         "",
+			width:          "",
+			colors:         []string{"yellow", "green"},
 			wantStatusCode: http.StatusCreated,
-			apiOut: prepareSVGData(t, ex34.Height, ex34.Width, []string{"yellow", "green"}),
+			apiOut:         prepareSVGData(t, ex34.Height, ex34.Width, []string{"yellow", "green"}),
 		},
 		"heightがマイナス": {
-			height: "-1",
-			width: "",
-			colors: []string{},
+			height:         "-1",
+			width:          "",
+			colors:         []string{},
 			wantStatusCode: http.StatusBadRequest,
-			wantErr: true,
-			apiOut: "invalid height value\n",
+			wantErr:        true,
+			apiOut:         "invalid height value\n",
 		},
 		"widthがマイナス": {
-			height: "",
-			width: "-1",
-			colors: []string{},
+			height:         "",
+			width:          "-1",
+			colors:         []string{},
 			wantStatusCode: http.StatusBadRequest,
-			wantErr: true,
-			apiOut: "invalid width value\n",
+			wantErr:        true,
+			apiOut:         "invalid width value\n",
 		},
 		"colorが多い": {
-			height: "",
-			width: "",
-			colors: []string{"blue", "yellow", "green"},
+			height:         "",
+			width:          "",
+			colors:         []string{"blue", "yellow", "green"},
 			wantStatusCode: http.StatusBadRequest,
-			wantErr: true,
-			apiOut: "invalid color, length must be 2\n",
+			wantErr:        true,
+			apiOut:         "invalid color, length must be 2\n",
 		},
 	}
 
