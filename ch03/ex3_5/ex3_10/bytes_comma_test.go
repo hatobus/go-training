@@ -14,8 +14,8 @@ func TestBytesComma(t *testing.T) {
 
 	testCases := map[string]testData{
 		"3文字以下の時": {
-			input:  "10",
-			output: "10",
+			input:  "100",
+			output: "100",
 		},
 		"コンマが1つ入る": {
 			input:  "1000",
