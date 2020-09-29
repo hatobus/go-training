@@ -5,7 +5,6 @@ import (
 	"image/color"
 	"image/png"
 	"log"
-	"math"
 	"math/cmplx"
 	"os"
 )
@@ -32,6 +31,7 @@ func main() {
 	}
 }
 
+// https://azisava.sakura.ne.jp/mandelbrot/algorithm.html
 func mandelbrot(z complex128) color.Color {
 	const iterations = 200
 
@@ -39,11 +39,10 @@ func mandelbrot(z complex128) color.Color {
 	for n := uint8(0); n < iterations; n++ {
 		v = v*v + z
 		if cmplx.Abs(v) > 2 {
-			if n > 50 {
-				return color.RGBA{100, 0, 0, 255}
+			if n%2 == 1 {
+				return color.RGBA{0xff, 0x00, 0x00, 0xff}
 			} else {
-				mathlog := math.Log(float64(n) / math.Log(float64(iterations)))
-				return color.RGBA{0, 0, 255 - uint8(mathlog*255), 255}
+				return color.RGBA{0x00, 0xff, 0x00, 0xff}
 			}
 		}
 	}
