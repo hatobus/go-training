@@ -31,7 +31,8 @@ func main() {
 	mode := os.Args[1]
 	args := os.Args[2:]
 
-	if mode == cmdSearch {
+	switch mode {
+	case cmdSearch:
 		if !arguments.ValidateSearchArguments(args) {
 			log.Fatalf(usage)
 		}
@@ -39,5 +40,7 @@ func main() {
 			log.Fatal(err)
 		}
 		return
+	default:
+		log.Fatal(usage)
 	}
 }
