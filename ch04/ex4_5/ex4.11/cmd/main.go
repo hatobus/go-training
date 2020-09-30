@@ -53,6 +53,16 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
+	case cmdOpen:
+		err = command.OpenIssue(owner, repo, number)
+		if err != nil {
+			log.Fatal(err)
+		}
+	case cmdClose:
+		err = command.CloseIssue(owner, repo, number)
+		if err != nil {
+			log.Fatal(err)
+		}
 	default:
 		log.Fatal(usage)
 	}
