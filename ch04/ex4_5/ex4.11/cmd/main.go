@@ -4,6 +4,8 @@ import (
 	"log"
 	"os"
 
+	arguments "github.com/hatobus/go-training/ch04/ex4_5/ex4.11/argument"
+
 	"github.com/hatobus/go-training/ch04/ex4_5/ex4.11/command"
 )
 
@@ -22,7 +24,7 @@ usage:
 `
 
 func main() {
-	if len(os.Args) < 2 {
+	if !arguments.ValidateArgsRunning(os.Args) {
 		log.Fatal(usage)
 	}
 
@@ -30,7 +32,7 @@ func main() {
 	args := os.Args[2:]
 
 	if mode == cmdSearch {
-		if len(args) < 1 {
+		if !arguments.ValidateSearchArguments(args) {
 			log.Fatalf(usage)
 		}
 		if err := command.Search(args); err != nil {
