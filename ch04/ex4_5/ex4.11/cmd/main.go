@@ -31,8 +31,7 @@ func main() {
 	mode := os.Args[1]
 	args := os.Args[2:]
 
-	switch mode {
-	case cmdSearch:
+	if mode == cmdSearch {
 		if !arguments.ValidateSearchArguments(args) {
 			log.Fatalf(usage)
 		}
@@ -40,6 +39,20 @@ func main() {
 			log.Fatal(err)
 		}
 		return
+	}
+
+	owner, repo, number, err := arguments.GetIdentifier(args)
+	if err != nil {
+		log.Println(err)
+		log.Fatal(usage)
+	}
+
+	switch mode {
+	case cmdRead:
+		err = command.ReadIssue(owner, repo, number)
+		if err != nil {
+			log.Fatal(err)
+		}
 	default:
 		log.Fatal(usage)
 	}

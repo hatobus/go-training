@@ -9,6 +9,6 @@ func Search(args []string) error {
 	if err != nil {
 		return err
 	}
-	github.PPIssue(result.Items)
+	github.PPIssues(result.Items)
 	return nil
 }
