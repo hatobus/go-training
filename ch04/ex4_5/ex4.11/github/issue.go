@@ -15,7 +15,7 @@ func PPIssue(issue *Issue) {
 func PPIssueDetail(issue *Issue) {
 	fmt.Printf(
 		"No: #%v\tUser: %v\tTitle: %v\tState: %v\n"+
-			"URL: %v\n"+"Body: %v",
+			"URL: %v\n"+"Body: %v\n",
 		issue.Number, issue.User.Login, issue.Title, issue.State,
 		issue.HTMLURL, issue.Body,
 	)

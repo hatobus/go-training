@@ -77,7 +77,10 @@ func main() {
 			log.Fatal(err)
 		}
 	case cmdEdit:
-
+		err = command.EditIssue(owner, repo, number)
+		if err != nil {
+			log.Fatal(err)
+		}
 	default:
 		log.Fatal(usage)
 	}
