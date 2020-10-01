@@ -26,6 +26,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	http.Handle("/", handler.NewIssuesHandler(issues))
+	// Goのルーティングは最初にマッチしたものなので / にするとそれ以外のエンドポイントが作れない
+	http.Handle("/list", handler.NewIssuesHandler(issues))
+	http.Handle("/issue", handler.IssueDetailHandler(issues))
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

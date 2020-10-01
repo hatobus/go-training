@@ -28,8 +28,8 @@ type Issue struct {
 	Body      string    // in Markdown format
 }
 
-func (i Issue) GenURL() string {
-	return fmt.Sprintf("/issues/%v", i.Number)
+func (i Issue) GenIssueDetailURL() string {
+	return fmt.Sprintf("/issue?no=%v", i.Number)
 }
 
 type User struct {

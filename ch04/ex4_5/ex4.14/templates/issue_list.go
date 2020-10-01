@@ -14,10 +14,10 @@ var TemplateOfIssueList = template.Must(
 </tr>
 {{range .Issues}}
 <tr>
-	<td><a href='{{.GenURL}}'>{{.Number}}</td>
+	<td><a href='{{.GenIssueDetailURL}}'>{{.Number}}</td>
 	<td>{{.State}}</td>
 	<td><a href='{{.User.HTMLURL}}'>{{.User.Login}}</a></td>
-	<td><a href='{{.GenURL}}'>{{.Title}}</a></td>
+	<td><a href='{{.GenIssueDetailURL}}'>{{.Title}}</a></td>
 </tr>
 {{end}}
 </table>
