@@ -15,12 +15,15 @@ const (
 	cmdEdit   = "edit"
 	cmdClose  = "close"
 	cmdOpen   = "open"
+
+	cmdEditor = "editor"
 )
 
 var usage string = `
 usage:
 	search: search issue. args --> search query
 	[read | edit | close | open]: args --> owner repo issue_number
+	editor: set issue editor --> editor [editor command]
 `
 
 func main() {
@@ -38,6 +41,16 @@ func main() {
 		if err := command.Search(args); err != nil {
 			log.Fatal(err)
 		}
+		return
+	} else if mode == cmdEditor {
+		if !arguments.ValidateEditorArguments(args) {
+			log.Fatalf("editor %v is not valid", args[0])
+		}
+		err := os.Setenv("ISSUE_EDITOR", args[0])
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.Printf("Current issue editor: %v\n", os.Getenv("ISSUE_EDITOR"))
 		return
 	}
 
@@ -63,6 +76,8 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
+	case cmdEdit:
+
 	default:
 		log.Fatal(usage)
 	}
