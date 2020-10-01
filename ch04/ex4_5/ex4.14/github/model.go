@@ -1,6 +1,7 @@
 package github
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -12,6 +13,11 @@ type IssuesSearchResult struct {
 	Items      []*Issue
 }
 
+type RepoIssues struct {
+	Issues       []Issue
+	IssuesNumber map[int]Issue
+}
+
 type Issue struct {
 	Number    int
 	HTMLURL   string `json:"html_url"`
@@ -20,6 +26,10 @@ type Issue struct {
 	User      *User
 	CreatedAt time.Time `json:"created_at"`
 	Body      string    // in Markdown format
+}
+
+func (i Issue) GenURL() string {
+	return fmt.Sprintf("/issues/%v", i.Number)
 }
 
 type User struct {

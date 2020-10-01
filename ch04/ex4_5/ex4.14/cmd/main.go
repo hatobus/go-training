@@ -26,6 +26,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	http.Handle("/", handler.NeeIssuesHandler(issues))
+	http.Handle("/", handler.NewIssuesHandler(issues))
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

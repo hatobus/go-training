@@ -7,7 +7,7 @@ import (
 	"path"
 )
 
-func ReadIssueFromIdentifier(owner, repo string) ([]Issue, error) {
+func ReadIssueFromIdentifier(owner, repo string) (*RepoIssues, error) {
 	u, err := url.Parse(APIURL)
 	if err != nil {
 		return nil, err
@@ -26,5 +26,12 @@ func ReadIssueFromIdentifier(owner, repo string) ([]Issue, error) {
 		return nil, err
 	}
 
-	return issues, nil
+	ri := &RepoIssues{}
+	ri.IssuesNumber = make(map[int]Issue, len(issues))
+	for _, issue := range issues {
+		ri.Issues = append(ri.Issues, issue)
+		ri.IssuesNumber[issue.Number] = issue
+	}
+
+	return ri, nil
 }
