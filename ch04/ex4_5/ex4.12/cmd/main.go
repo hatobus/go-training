@@ -40,6 +40,14 @@ func main() {
 		fmt.Println(c)
 		return
 	case cmdIndex:
+		if !argument.ValidateIndexArguments(os.Args) {
+			log.Fatal(usage)
+		}
+		err := command.GenerateIndex(os.Args[2])
+		if err != nil {
+			log.Fatal(err)
+		}
+		return
 	case cmdSearch:
 	default:
 		log.Fatal(usage)
