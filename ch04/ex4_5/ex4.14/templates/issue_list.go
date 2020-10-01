@@ -2,11 +2,6 @@ package templates
 
 import "html/template"
 
-var TemplateOfIssueList = template.Must(
-	template.New("issues").Parse(
-		``,
-	))
-
 var TemplateOfIssue = template.Must(
 	template.New("issue").Parse(`
 <h1>{{.Title}}</h1>
@@ -16,5 +11,7 @@ var TemplateOfIssue = template.Must(
 	<dt>state</dt>
 	<dd>{{.State}}</dd>
 </dl>
+<br>
+<h3>Body</h3>
 <p>{{.Body}}</p>
 `))
