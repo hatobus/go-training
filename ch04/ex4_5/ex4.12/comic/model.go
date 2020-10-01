@@ -2,7 +2,6 @@ package comic
 
 const URL = "https://xkcd.com"
 
-type IndexOfWord map[string]map[int]bool
 type IndexOfNumber map[int]Comic
 
 type Comic struct {

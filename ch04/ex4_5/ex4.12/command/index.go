@@ -14,7 +14,7 @@ func GenerateIndex(fname string) error {
 		return err
 	}
 
-	_, indexNumber := comic.GenerateIndex(comicchan)
+	indexNumber := comic.GenerateIndex(comicchan)
 
 	f, err := os.Create(fname)
 	if err != nil {
