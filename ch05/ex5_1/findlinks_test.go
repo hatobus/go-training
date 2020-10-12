@@ -40,6 +40,10 @@ func TestFindLinks(t *testing.T) {
 				"https://google.com",
 			},
 		},
+		"リンクが存在しない": {
+			fname:   filepath.Join(testDataDir, "example.html"),
+			wantOut: []string{},
+		},
 		"存在しないファイルが指定された時": {
 			fname:         "notfound.html",
 			wantErr:       true,
