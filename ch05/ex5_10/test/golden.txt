@@ -1,0 +1,13 @@
+1:	intro to programming
+2:	discrete math
+3:	data structures
+4:	formal languages
+5:	computer organization
+6:	compilers
+7:	operating systems
+8:	programming languages
+9:	algorithms
+10:	linear algebra
+11:	calculus
+12:	networks
+13:	databases
