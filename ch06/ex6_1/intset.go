@@ -64,7 +64,7 @@ func (s *IntSet) String() string {
 	return buf.String()
 }
 
-func (s *IntSet) len() int {
+func (s *IntSet) Len() int {
 	return len(s.words)
 }
 
