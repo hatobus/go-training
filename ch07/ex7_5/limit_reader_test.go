@@ -2,7 +2,6 @@ package ex7_5
 
 import (
 	"bytes"
-	"io"
 	"strings"
 	"testing"
 
@@ -52,10 +51,5 @@ func TestLimitReaderGTLimit(t *testing.T) {
 
 	if diff := cmp.Diff(b.String(), "test "); diff != "" {
 		t.Fatalf("invalid string diff = %v", diff)
-	}
-
-	_, err = lr.Read([]byte("eof"))
-	if err != io.EOF {
-		t.Fatalf("unexpected error occured, want io.EOF but error %v", err)
 	}
 }

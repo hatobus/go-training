@@ -22,7 +22,7 @@ func (lr *LimitReader) Read(p []byte) (int, error) {
 
 	n, err := lr.R.Read(p)
 	if err != nil {
-		return 0, err
+		return n, err
 	}
 
 	// Nを更新して読み込める残りのバイト長を変える
