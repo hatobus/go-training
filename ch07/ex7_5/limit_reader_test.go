@@ -43,7 +43,7 @@ func TestLimitReaderGTLimit(t *testing.T) {
 
 	n, err := b.ReadFrom(lr)
 	if err != nil {
-		t.Log(err)
+		t.Fatal(err)
 	}
 
 	if diff := cmp.Diff(int(n), limit); diff != "" {
