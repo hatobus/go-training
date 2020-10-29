@@ -47,31 +47,6 @@ func TestEval(t *testing.T) {
 	}
 }
 
-func TestErrors(t *testing.T) {
-	for _, test := range []struct{ expr, wantErr string }{
-		{`"waiwai"`, "unexpected '\"'"},
-		{"math.e", "unexpected '.'"},
-		{"!true", "unexpected '!'"},
-		{"x % 2", "unexpected '%'"},
-		{"log(64)", `unknown function "log"`},
-		{"pow(1)", "call to pow has 1 args, want 2"},
-	} {
-		expr, err := Parse(test.expr)
-		if err == nil {
-			vars := make(map[Var]bool)
-			err = expr.Check(vars)
-			if err == nil {
-				t.Errorf("unexpected success: %s", test.expr)
-				continue
-			}
-		}
-		fmt.Printf("%-20s%v\n", test.expr, err) // (for book)
-		if err.Error() != test.wantErr {
-			t.Errorf("got error %s, want %s", err, test.wantErr)
-		}
-	}
-}
-
 func TestEvaluate(t *testing.T) {
 	testCases := map[string]struct {
 		expr   string
