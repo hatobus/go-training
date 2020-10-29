@@ -38,6 +38,7 @@ func TestXMLSelectorFromFile(t *testing.T) {
 	for testName, tc := range testCases {
 		tc := tc
 		t.Run(testName, func(t *testing.T) {
+			t.Parallel()
 			out, err := SelectFromFile(tc.filename, tc.elems)
 			if err != nil {
 				t.Fatal(err)
