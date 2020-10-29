@@ -9,25 +9,33 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
-func fixtureServer(t testing.TB) *PriceDB {
+func fixtureServer(t testing.TB) (*PriceDB, *http.ServeMux) {
 	t.Helper()
+
+	mux := http.NewServeMux()
 
 	db := &PriceDB{}
 	db.db = make(map[string]int, 0)
 	db.db["shoe"] = 50
 	db.db["socks"] = 5
 
-	http.HandleFunc("/create", db.Create)
-	http.HandleFunc("/read", db.Read)
-	http.HandleFunc("/update", db.Update)
-	http.HandleFunc("/delete", db.Delete)
+	mux.HandleFunc("/create", db.Create)
+	mux.HandleFunc("/read", db.Read)
+	mux.HandleFunc("/update", db.Update)
+	mux.HandleFunc("/delete", db.Delete)
 
-	return db
+	return db, mux
 }
 
 func TestPriceDBCreate(t *testing.T) {
-	//t.Parallel()
-	db := fixtureServer(t)
+	t.Parallel()
+
+	db, mux := fixtureServer(t)
+
+	server := httptest.NewServer(mux)
+	t.Cleanup(func() {
+		server.Close()
+	})
 
 	testCases := map[string]struct {
 		requestURL       string
@@ -82,8 +90,14 @@ func TestPriceDBCreate(t *testing.T) {
 }
 
 func TestPriceDBRead(t *testing.T) {
-	//t.Parallel()
-	db := fixtureServer(t)
+	t.Parallel()
+
+	db, mux := fixtureServer(t)
+
+	server := httptest.NewServer(mux)
+	t.Cleanup(func() {
+		server.Close()
+	})
 
 	testCases := map[string]struct {
 		requestURL       string
@@ -123,8 +137,14 @@ func TestPriceDBRead(t *testing.T) {
 }
 
 func TestPriceDBUpdate(t *testing.T) {
-	//t.Parallel()
-	db := fixtureServer(t)
+	t.Parallel()
+
+	db, mux := fixtureServer(t)
+
+	server := httptest.NewServer(mux)
+	t.Cleanup(func() {
+		server.Close()
+	})
 
 	testCases := map[string]struct {
 		requestURL         string
@@ -183,8 +203,14 @@ func TestPriceDBUpdate(t *testing.T) {
 }
 
 func TestPriceDBDelete(t *testing.T) {
-	//t.Parallel()
-	db := fixtureServer(t)
+	t.Parallel()
+
+	db, mux := fixtureServer(t)
+
+	server := httptest.NewServer(mux)
+	t.Cleanup(func() {
+		server.Close()
+	})
 
 	testCases := map[string]struct {
 		requestURL         string
