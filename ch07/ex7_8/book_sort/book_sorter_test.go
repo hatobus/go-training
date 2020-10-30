@@ -95,6 +95,11 @@ func TestBookSorter(t *testing.T) {
 			compareFunc: []func(*book.Book, *book.Book) int{book.PublishCmp},
 			expectBooks: genExpectBooks(t, 1, 3, 0, 2),
 		},
+		"Title順にSortしてPublish順にSort": {
+			books:       getBooks(t),
+			compareFunc: []func(*book.Book, *book.Book) int{book.TitleCmp, book.PublishCmp},
+			expectBooks: genExpectBooks(t, 3, 1, 0, 2),
+		},
 	}
 
 	for testName, tc := range testCases {
