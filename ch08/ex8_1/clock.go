@@ -1,6 +1,8 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"io"
 	"log"
 	"net"
@@ -8,7 +10,19 @@ import (
 )
 
 func main() {
-	listener, err := net.Listen("tcp", "localhost:8000")
+	port := flag.String("port", "8080", "listening port")
+	tz := flag.String("timezone", "Etc/GMT", "expect timezone")
+
+	flag.Parse()
+
+	err := changeTZ(*tz)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	localPort := fmt.Sprintf("localhost:%v", *port)
+
+	listener, err := net.Listen("tcp", localPort)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -20,6 +34,16 @@ func main() {
 		}
 		go handleConn(conn)
 	}
+}
+
+func changeTZ(tz string) error {
+	loc, err := time.LoadLocation(tz)
+	if err != nil {
+		return err
+	}
+	time.Local = loc
+	log.Println(loc)
+	return nil
 }
 
 func handleConn(c net.Conn) {
