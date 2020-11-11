@@ -39,8 +39,6 @@ func main() {
 		clocks = append(clocks, &Clock{Name: d[0], Address: d[1]})
 	}
 
-	log.Println(clocks)
-
 	for _, clock := range clocks {
 		conn, err := net.Dial("tcp", clock.Address)
 		if err != nil {
@@ -51,6 +49,6 @@ func main() {
 	}
 
 	for {
-		time.Sleep(30 * time.Second)
+		time.Sleep(10 * time.Second)
 	}
 }
