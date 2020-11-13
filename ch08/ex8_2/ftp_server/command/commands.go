@@ -9,3 +9,13 @@ const (
 	QUIT        // close FTP connection
 	RETR        // Retrieve remote file
 )
+
+var CMD = map[string]int{
+	"cd":   CWD,
+	"rm":   DELE,
+	"help": HELP,
+	"ls":   LIST,
+	"pwd":  PWD,
+	"exit": QUIT,
+	"cp":   RETR,
+}
