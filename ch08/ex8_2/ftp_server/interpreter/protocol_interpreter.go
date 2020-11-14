@@ -40,17 +40,18 @@ func (pi *interpreter) Run() {
 			args = userInput[1:]
 		}
 
-		var cmdint int
-		cmdint, ok := command.CMD[cmd]
+		var cmdInt int
+		cmdInt, ok := command.CMD[cmd]
 		if !ok {
 			pi.conn.Write([]byte(fmt.Sprintf("command \"%v\" is not expected! \"help\" command show the usage commands\n", cmd)))
 			continue
 		}
 
-		switch cmdint {
+		switch cmdInt {
 		case command.CWD:
 			pi.conn.Write([]byte(fmt.Sprintf("your command is CWD: %v\n", command.CWD)))
 		case command.USER, command.PASS, command.ACCT:
+			// 今回ログインは実装しない
 			pi.conn.Write([]byte("202 \n"))
 		case command.PORT:
 			pi.conn.Write([]byte("200 port command\n"))

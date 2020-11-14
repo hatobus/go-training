@@ -15,13 +15,13 @@ const (
 )
 
 var CMD = map[string]int{
-	"cd":   CWD,
-	"rm":   DELE,
-	"help": HELP,
-	"ls":   LIST,
-	"pwd":  PWD,
-	"exit": QUIT,
-	"cp":   RETR,
+	"CWD":  CWD,
+	"DELE": DELE,
+	"HELP": HELP,
+	"LIST": LIST,
+	"PWD":  PWD,
+	"QUIT": QUIT,
+	"RETR": RETR,
 	"USER": USER,
 	"PASS": PASS,
 	"ACCT": ACCT,
