@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net"
 	"strings"
-	"time"
 
 	"github.com/hatobus/go-training/ch08/ex8_2/ftp_server/command"
 )
@@ -22,8 +21,7 @@ func NewInterpreter(newConnection net.Conn) *interpreter {
 
 // Start to wait user input command
 func (pi *interpreter) Run() {
-	pi.conn.Write([]byte("200 Ready."))
-	pi.conn.Write([]byte(fmt.Sprintf("HI! %v\n", time.Now().Format(time.RFC822))))
+	pi.conn.Write([]byte("200 Ready.\n"))
 
 	scanner := bufio.NewScanner(pi.conn)
 
@@ -42,19 +40,22 @@ func (pi *interpreter) Run() {
 			args = userInput[1:]
 		}
 
-		pi.conn.Write([]byte(fmt.Sprintf("input cmd: %v, input args: %v\n", cmd, args)))
-
-		_, ok := command.CMD[cmd]
+		var cmdint int
+		cmdint, ok := command.CMD[cmd]
 		if !ok {
 			pi.conn.Write([]byte(fmt.Sprintf("command \"%v\" is not expected! \"help\" command show the usage commands\n", cmd)))
 			continue
 		}
 
-		switch command.CMD[cmd] {
+		switch cmdint {
 		case command.CWD:
 			pi.conn.Write([]byte(fmt.Sprintf("your command is CWD: %v\n", command.CWD)))
+		case command.USER, command.PASS, command.ACCT:
+			pi.conn.Write([]byte("202 \n"))
+		case command.PORT:
+			pi.conn.Write([]byte("200 port command\n"))
 		default:
-			pi.conn.Write([]byte(fmt.Sprintf("command \"%v\" is not expected! \"help\" command show the usage commands\n", cmd)))
+			pi.conn.Write([]byte(fmt.Sprintf("command \"%v\": [%v] is not expected! \"help\" command show the usage commands\n", cmd, args)))
 			continue
 		}
 	}

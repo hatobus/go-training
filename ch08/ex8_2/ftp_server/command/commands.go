@@ -8,6 +8,10 @@ const (
 	PWD         // print working directory
 	QUIT        // close FTP connection
 	RETR        // Retrieve remote file
+	USER        // user login
+	PASS        // pass command
+	ACCT        // acct command
+	PORT        // port command
 )
 
 var CMD = map[string]int{
@@ -18,4 +22,8 @@ var CMD = map[string]int{
 	"pwd":  PWD,
 	"exit": QUIT,
 	"cp":   RETR,
+	"USER": USER,
+	"PASS": PASS,
+	"ACCT": ACCT,
+	"PORT": PORT,
 }
