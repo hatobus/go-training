@@ -45,7 +45,7 @@ func (pi *interpreter) Run() {
 		var err error
 		cmdInt, ok := command.CMD[cmd]
 		if !ok {
-			if _, err = pi.conn.Write([]byte(fmt.Sprintf("command \"%v\" is not expected! \"help\" command show the usage commands\n", cmd))); err != nil {
+			if _, err = pi.conn.Write([]byte(fmt.Sprintf("command \"%v\" is not expected! \"help\" command show the usage commands\r\n", cmd))); err != nil {
 				log.Println(err)
 			}
 			continue
@@ -55,7 +55,7 @@ func (pi *interpreter) Run() {
 
 		switch cmdInt {
 		case command.CWD:
-			_, err = pi.conn.Write([]byte(fmt.Sprintf("your command is CWD: %v\n", command.CWD)))
+			_, err = pi.conn.Write([]byte(fmt.Sprintf("your command is CWD: %v\r\n", command.CWD)))
 		case command.DELE:
 			statusCode = StatusRequestedFileActionOK
 		case command.HELP:
@@ -68,14 +68,14 @@ func (pi *interpreter) Run() {
 			statusCode = StatusNotImplemented
 		case command.USER, command.PASS, command.ACCT:
 			// 今回ログインは実装しない
-			statusCode = StatusNotImplemented
+			statusCode = StatusLoggedIn
 		case command.PORT:
 			statusCode = StatusCommandOK
 		case command.QUIT:
 			statusCode = StatusClosing
 			break
 		default:
-			if _, err = pi.conn.Write([]byte(fmt.Sprintf("command \"%v\": [%v] is not expected! \"help\" command show the usage commands\n", cmd, args))); err != nil {
+			if _, err = pi.conn.Write([]byte(fmt.Sprintf("command \"%v\": [%v] is not expected! \"help\" command show the usage commands\r\n", cmd, args))); err != nil {
 				log.Println(err)
 			}
 			_, err = pi.conn.Write(StatusTextln(StatusHelp))

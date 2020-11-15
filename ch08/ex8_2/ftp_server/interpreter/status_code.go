@@ -57,5 +57,5 @@ const (
 )
 
 func StatusTextln(code int) []byte {
-	return []byte(strconv.Itoa(code) + "\n")
+	return []byte(strconv.Itoa(code) + "\r\n")
 }
