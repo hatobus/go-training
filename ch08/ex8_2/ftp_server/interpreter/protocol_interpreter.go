@@ -3,6 +3,7 @@ package interpreter
 import (
 	"bufio"
 	"fmt"
+	"log"
 	"net"
 	"strings"
 
@@ -41,23 +42,35 @@ func (pi *interpreter) Run() {
 		}
 
 		var cmdInt int
+		var err error
 		cmdInt, ok := command.CMD[cmd]
 		if !ok {
-			pi.conn.Write([]byte(fmt.Sprintf("command \"%v\" is not expected! \"help\" command show the usage commands\n", cmd)))
+			if _, err = pi.conn.Write([]byte(fmt.Sprintf("command \"%v\" is not expected! \"help\" command show the usage commands\n", cmd))); err != nil {
+				log.Println(err)
+			}
 			continue
 		}
 
 		switch cmdInt {
 		case command.CWD:
-			pi.conn.Write([]byte(fmt.Sprintf("your command is CWD: %v\n", command.CWD)))
+			_, err = pi.conn.Write([]byte(fmt.Sprintf("your command is CWD: %v\n", command.CWD)))
 		case command.USER, command.PASS, command.ACCT:
 			// 今回ログインは実装しない
-			pi.conn.Write([]byte("202 \n"))
+			_, err = pi.conn.Write(StatusTextln(StatusCommandNotImplemented))
 		case command.PORT:
-			pi.conn.Write([]byte("200 port command\n"))
+			_, err = pi.conn.Write(StatusTextln(StatusCommandOK))
+		case command.QUIT:
+			_, err = pi.conn.Write(StatusTextln(StatusClosing))
 		default:
-			pi.conn.Write([]byte(fmt.Sprintf("command \"%v\": [%v] is not expected! \"help\" command show the usage commands\n", cmd, args)))
+			if _, err = pi.conn.Write([]byte(fmt.Sprintf("command \"%v\": [%v] is not expected! \"help\" command show the usage commands\n", cmd, args))); err != nil {
+				log.Println(err)
+			}
+			_, err = pi.conn.Write(StatusTextln(StatusHelp))
 			continue
+		}
+
+		if err != nil {
+			log.Println(err)
 		}
 	}
 
