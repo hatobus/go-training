@@ -22,7 +22,7 @@ func NewInterpreter(newConnection net.Conn) *interpreter {
 
 // Start to wait user input command
 func (pi *interpreter) Run() {
-	pi.conn.Write([]byte("200 Ready.\n"))
+	pi.conn.Write(StatusTextln(StatusCommandOK))
 
 	scanner := bufio.NewScanner(pi.conn)
 
@@ -51,16 +51,29 @@ func (pi *interpreter) Run() {
 			continue
 		}
 
+		var statusCode int
+
 		switch cmdInt {
 		case command.CWD:
 			_, err = pi.conn.Write([]byte(fmt.Sprintf("your command is CWD: %v\n", command.CWD)))
+		case command.DELE:
+			statusCode = StatusRequestedFileActionOK
+		case command.HELP:
+			statusCode = StatusHelp
+		case command.LIST:
+			statusCode = StatusNotImplemented
+		case command.PWD:
+			statusCode = StatusNotImplemented
+		case command.RETR:
+			statusCode = StatusNotImplemented
 		case command.USER, command.PASS, command.ACCT:
 			// 今回ログインは実装しない
-			_, err = pi.conn.Write(StatusTextln(StatusCommandNotImplemented))
+			statusCode = StatusNotImplemented
 		case command.PORT:
-			_, err = pi.conn.Write(StatusTextln(StatusCommandOK))
+			statusCode = StatusCommandOK
 		case command.QUIT:
-			_, err = pi.conn.Write(StatusTextln(StatusClosing))
+			statusCode = StatusClosing
+			break
 		default:
 			if _, err = pi.conn.Write([]byte(fmt.Sprintf("command \"%v\": [%v] is not expected! \"help\" command show the usage commands\n", cmd, args))); err != nil {
 				log.Println(err)
@@ -69,6 +82,7 @@ func (pi *interpreter) Run() {
 			continue
 		}
 
+		_, err = pi.conn.Write(StatusTextln(statusCode))
 		if err != nil {
 			log.Println(err)
 		}
