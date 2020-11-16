@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"os/user"
 	"strings"
 
 	"github.com/hatobus/go-training/ch08/ex8_2/ftp_server/command"
@@ -12,6 +13,7 @@ import (
 
 type interpreter struct {
 	conn net.Conn // PI (Protocol interpreter) connection
+	wd   string
 }
 
 func NewInterpreter(newConnection net.Conn) *interpreter {
@@ -20,9 +22,30 @@ func NewInterpreter(newConnection net.Conn) *interpreter {
 	}
 }
 
+func (pi *interpreter) println(format string, args ...interface{}) (int, error) {
+	line := fmt.Sprintf(format, args...)
+	return pi.conn.Write([]byte(line))
+}
+
+func (pi *interpreter) setWorkingDir() error {
+	u, err := user.Current()
+	if err != nil {
+		return err
+	}
+	pi.wd = u.HomeDir
+	return nil
+}
+
 // Start to wait user input command
 func (pi *interpreter) Run() {
 	pi.conn.Write(StatusTextln(StatusCommandOK))
+
+	err := pi.setWorkingDir()
+	if err != nil {
+		pi.conn.Write([]byte(err.Error()))
+		pi.conn.Close()
+		return
+	}
 
 	scanner := bufio.NewScanner(pi.conn)
 
@@ -45,7 +68,7 @@ func (pi *interpreter) Run() {
 		var err error
 		cmdInt, ok := command.CMD[cmd]
 		if !ok {
-			if _, err = pi.conn.Write([]byte(fmt.Sprintf("command \"%v\" is not expected! \"help\" command show the usage commands\r\n", cmd))); err != nil {
+			if _, err = pi.println("command \"%v\" is not expected! \"help\" command show the usage commands\r\n", cmd); err != nil {
 				log.Println(err)
 			}
 			continue
@@ -55,7 +78,7 @@ func (pi *interpreter) Run() {
 
 		switch cmdInt {
 		case command.CWD:
-			_, err = pi.conn.Write([]byte(fmt.Sprintf("your command is CWD: %v\r\n", command.CWD)))
+			_, err = pi.println("your command is CWD: %v\r\n", command.CWD)
 		case command.DELE:
 			statusCode = StatusRequestedFileActionOK
 		case command.HELP:
@@ -63,7 +86,7 @@ func (pi *interpreter) Run() {
 		case command.LIST:
 			statusCode = StatusNotImplemented
 		case command.PWD:
-			statusCode = StatusNotImplemented
+			statusCode, err = pi.printWorkingDir()
 		case command.RETR:
 			statusCode = StatusNotImplemented
 		case command.USER, command.PASS, command.ACCT:
@@ -75,7 +98,7 @@ func (pi *interpreter) Run() {
 			statusCode = StatusClosing
 			break
 		default:
-			if _, err = pi.conn.Write([]byte(fmt.Sprintf("command \"%v\": [%v] is not expected! \"help\" command show the usage commands\r\n", cmd, args))); err != nil {
+			if _, err = pi.println("command \"%v\": [%v] is not expected! \"help\" command show the usage commands\r\n", cmd, args); err != nil {
 				log.Println(err)
 			}
 			_, err = pi.conn.Write(StatusTextln(StatusHelp))
@@ -93,6 +116,14 @@ func (pi *interpreter) Run() {
 	}
 
 	pi.conn.Close()
+}
+
+func (pi *interpreter) printWorkingDir() (int, error) {
+	_, err := pi.println(pi.wd + "\r\n")
+	if err != nil {
+		return StatusBadCommand, err
+	}
+	return StatusRequestedFileActionOK, nil
 }
 
 func (pi *interpreter) changeDir() {
