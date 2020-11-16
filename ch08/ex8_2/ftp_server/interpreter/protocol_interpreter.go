@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"os"
 	"os/user"
+	"path/filepath"
 	"strings"
 
 	"github.com/hatobus/go-training/ch08/ex8_2/ftp_server/command"
@@ -78,9 +80,14 @@ func (pi *interpreter) Run() {
 
 		switch cmdInt {
 		case command.CWD:
-			_, err = pi.println("your command is CWD: %v\r\n", command.CWD)
+			if len(args) != 1 {
+				_, err = pi.println("invalid arguments, cd commands must be \"cd path/to/destination\"\r\n")
+				statusCode = StatusBadArguments
+			} else {
+				statusCode, err = pi.changeDir(args[0])
+			}
 		case command.DELE:
-			statusCode = StatusRequestedFileActionOK
+			statusCode = StatusNotImplemented
 		case command.HELP:
 			statusCode = StatusHelp
 		case command.LIST:
@@ -118,16 +125,22 @@ func (pi *interpreter) Run() {
 	pi.conn.Close()
 }
 
+func (pi *interpreter) changeDir(dst string) (int, error) {
+	dstPath := filepath.Join(pi.wd, dst)
+	if _, err := os.Stat(dstPath); os.IsNotExist(err) {
+		pi.println("%v: No such file or directory ", dst)
+		return StatusBadArguments, nil
+	}
+	pi.wd = dstPath
+	return StatusRequestedFileActionOK, nil
+}
+
 func (pi *interpreter) printWorkingDir() (int, error) {
-	_, err := pi.println(pi.wd + "\r\n")
+	_, err := pi.println(pi.wd + " ")
 	if err != nil {
 		return StatusBadCommand, err
 	}
 	return StatusRequestedFileActionOK, nil
-}
-
-func (pi *interpreter) changeDir() {
-	panic("not impl")
 }
 
 func (pi *interpreter) list() {
