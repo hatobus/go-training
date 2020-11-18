@@ -12,6 +12,8 @@ const (
 	PASS        // pass command
 	ACCT        // acct command
 	PORT        // port command
+	SYST        // syst command
+	LPRT        // LPRT command
 )
 
 var CMD = map[string]int{
@@ -26,4 +28,6 @@ var CMD = map[string]int{
 	"PASS": PASS,
 	"ACCT": ACCT,
 	"PORT": PORT,
+	"SYST": SYST,
+	"LPRT": LPRT,
 }

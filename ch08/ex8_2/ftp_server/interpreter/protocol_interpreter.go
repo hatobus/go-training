@@ -14,8 +14,9 @@ import (
 )
 
 type interpreter struct {
-	conn net.Conn // PI (Protocol interpreter) connection
-	wd   string
+	conn     net.Conn // PI (Protocol interpreter) connection
+	wd       string
+	hostPort string
 }
 
 func NewInterpreter(newConnection net.Conn) *interpreter {
@@ -24,9 +25,10 @@ func NewInterpreter(newConnection net.Conn) *interpreter {
 	}
 }
 
-func (pi *interpreter) println(format string, args ...interface{}) (int, error) {
+func (pi *interpreter) printf(format string, args ...interface{}) (int, error) {
 	line := fmt.Sprintf(format, args...)
-	return pi.conn.Write([]byte(line))
+	//return pi.conn.Write([]byte(line))
+	return fmt.Fprint(pi.conn, line)
 }
 
 func (pi *interpreter) setWorkingDir() error {
@@ -66,11 +68,13 @@ func (pi *interpreter) Run() {
 			args = userInput[1:]
 		}
 
+		log.Printf("cmd: %v, args; %v\n", cmd, args)
+
 		var cmdInt int
 		var err error
 		cmdInt, ok := command.CMD[cmd]
 		if !ok {
-			if _, err = pi.println("command \"%v\" is not expected! \"help\" command show the usage commands\r\n", cmd); err != nil {
+			if _, err = pi.printf("command \"%v\" is not expected! \"help\" command show the usage commands ", cmd); err != nil {
 				log.Println(err)
 			}
 			continue
@@ -81,7 +85,7 @@ func (pi *interpreter) Run() {
 		switch cmdInt {
 		case command.CWD:
 			if len(args) != 1 {
-				_, err = pi.println("invalid arguments, cd commands must be \"cd path/to/destination\"\r\n")
+				_, err = pi.printf("invalid arguments, cd commands must be \"cd path/to/destination\" ")
 				statusCode = StatusBadArguments
 			} else {
 				statusCode, err = pi.changeDir(args[0])
@@ -99,17 +103,25 @@ func (pi *interpreter) Run() {
 		case command.USER, command.PASS, command.ACCT:
 			// 今回ログインは実装しない
 			statusCode = StatusLoggedIn
+		case command.SYST:
+			statusCode = StatusName
 		case command.PORT:
-			statusCode = StatusCommandOK
+			if len(args) != 1 {
+				_, err = pi.printf("invalid arguments \"PORT\" commands needs address arguments ")
+				statusCode = StatusBadArguments
+			} else {
+				statusCode = pi.port(args[0])
+			}
+		case command.LPRT:
+			continue
 		case command.QUIT:
 			statusCode = StatusClosing
 			break
 		default:
-			if _, err = pi.println("command \"%v\": [%v] is not expected! \"help\" command show the usage commands\r\n", cmd, args); err != nil {
+			if _, err = pi.printf("command \"%v\": [%v] is not expected! \"help\" command show the usage commands ", cmd, args); err != nil {
 				log.Println(err)
 			}
-			_, err = pi.conn.Write(StatusTextln(StatusHelp))
-			continue
+			statusCode = StatusHelp
 		}
 
 		_, err = pi.conn.Write(StatusTextln(statusCode))
@@ -128,7 +140,7 @@ func (pi *interpreter) Run() {
 func (pi *interpreter) changeDir(dst string) (int, error) {
 	dstPath := filepath.Join(pi.wd, dst)
 	if _, err := os.Stat(dstPath); os.IsNotExist(err) {
-		pi.println("%v: No such file or directory ", dst)
+		pi.printf("%v: No such file or directory ", dst)
 		return StatusBadArguments, nil
 	}
 	pi.wd = dstPath
@@ -136,16 +148,46 @@ func (pi *interpreter) changeDir(dst string) (int, error) {
 }
 
 func (pi *interpreter) printWorkingDir() (int, error) {
-	_, err := pi.println(pi.wd + " ")
+	_, err := pi.printf(pi.wd + " ")
 	if err != nil {
 		return StatusBadCommand, err
 	}
 	return StatusRequestedFileActionOK, nil
 }
 
-func (pi *interpreter) list() {
-	panic("not impl")
+func (pi *interpreter) port(address string) int {
+	var err error
+	pi.hostPort, err = pi.hostPortFTP(address)
+	if err != nil {
+		pi.printf("parse address failed ")
+		return StatusBadArguments
+	}
+	return StatusCommandOK
 }
+
+func (pi *interpreter) hostPortFTP(address string) (string, error) {
+	var h1, h2, h3, h4 byte
+	var p1, p2 int
+
+	_, err := fmt.Sscanf(address, "%d,%d,%d,%d,%d,%d", &h1, &h2, &h3, &h4, &p1, &p2)
+	if err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("%d.%d.%d.%d:%d", h1, h2, h3, h4, 256*p1+p2), nil
+}
+
+//func (pi *interpreter) nlst(dst string) (int, error) {
+//	dstPath := filepath.Join(pi.wd, dst)
+//
+//	fi, err := ioutil.ReadDir(dstPath)
+//	if err != nil {
+//		pi.printf("%v: No such file or directory ", dst)
+//		return StatusBadArguments, nil
+//	}
+//
+//
+//}
 
 func (pi *interpreter) get() {
 	panic("not impl")
