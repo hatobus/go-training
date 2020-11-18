@@ -3,6 +3,8 @@ package interpreter
 import (
 	"bufio"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"log"
 	"net"
 	"os"
@@ -16,6 +18,7 @@ import (
 type interpreter struct {
 	conn     net.Conn // PI (Protocol interpreter) connection
 	wd       string
+	prevCmd  int
 	hostPort string
 }
 
@@ -95,7 +98,14 @@ func (pi *interpreter) Run() {
 		case command.HELP:
 			statusCode = StatusHelp
 		case command.LIST:
-			statusCode = StatusNotImplemented
+			if len(args) == 0 {
+				statusCode, err = pi.list(".")
+			} else if len(args) != 1 {
+				_, err = pi.printf("invalid arguments, ls commands must be \"ls path/to/destination\" ")
+				statusCode = StatusBadArguments
+			} else {
+				statusCode, err = pi.list(args[0])
+			}
 		case command.PWD:
 			statusCode, err = pi.printWorkingDir()
 		case command.RETR:
@@ -128,6 +138,8 @@ func (pi *interpreter) Run() {
 		if err != nil {
 			log.Println(err)
 		}
+
+		pi.prevCmd = cmdInt
 	}
 
 	if scanner.Err() != nil {
@@ -135,6 +147,25 @@ func (pi *interpreter) Run() {
 	}
 
 	pi.conn.Close()
+}
+
+func (pi *interpreter) dataConnection() (io.ReadWriteCloser, error) {
+	var conn net.Conn
+	var err error
+
+	log.Println(pi.hostPort)
+
+	switch pi.prevCmd {
+	case command.PORT:
+		conn, err = net.Dial("tcp", pi.hostPort)
+		if err != nil {
+			return nil, err
+		}
+	default:
+		return nil, fmt.Errorf("previous command not PORT")
+	}
+
+	return conn, nil
 }
 
 func (pi *interpreter) changeDir(dst string) (int, error) {
@@ -177,17 +208,32 @@ func (pi *interpreter) hostPortFTP(address string) (string, error) {
 	return fmt.Sprintf("%d.%d.%d.%d:%d", h1, h2, h3, h4, 256*p1+p2), nil
 }
 
-//func (pi *interpreter) nlst(dst string) (int, error) {
-//	dstPath := filepath.Join(pi.wd, dst)
-//
-//	fi, err := ioutil.ReadDir(dstPath)
-//	if err != nil {
-//		pi.printf("%v: No such file or directory ", dst)
-//		return StatusBadArguments, nil
-//	}
-//
-//
-//}
+func (pi *interpreter) list(dst string) (int, error) {
+	conn, err := pi.dataConnection()
+	if err != nil {
+		return StatusBadCommand, err
+	}
+	defer conn.Close()
+
+	dstPath := filepath.Join(pi.wd, dst)
+
+	fi, err := ioutil.ReadDir(dstPath)
+	if err != nil {
+		pi.printf("%v: No such file or directory ", dst)
+		return StatusBadArguments, nil
+	}
+
+	pi.printf("%v\r\n", StatusAboutToSend)
+
+	for _, f := range fi {
+		_, err := fmt.Fprint(conn, f.Name(), "\n")
+		if err != nil {
+			return StatusBadCommand, err
+		}
+	}
+
+	return StatusClosingDataConnection, nil
+}
 
 func (pi *interpreter) get() {
 	panic("not impl")
