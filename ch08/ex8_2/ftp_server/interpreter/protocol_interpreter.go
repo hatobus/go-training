@@ -22,6 +22,11 @@ type interpreter struct {
 	hostPort string
 }
 
+type fileInfo struct {
+	info os.FileInfo
+	path string
+}
+
 func NewInterpreter(newConnection net.Conn) *interpreter {
 	return &interpreter{
 		conn: newConnection,
@@ -41,6 +46,20 @@ func (pi *interpreter) setWorkingDir() error {
 	}
 	pi.wd = u.HomeDir
 	return nil
+}
+
+func (pi *interpreter) checkPathExist(path string) (*fileInfo, error) {
+	var dstPath string
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		dstPath = filepath.Join(pi.wd, path)
+	} else if !os.IsNotExist(err) {
+		dstPath = path
+	} else {
+		return nil, err
+	}
+
+	fi, err := os.Stat(dstPath)
+	return &fileInfo{fi, dstPath}, err
 }
 
 // Start to wait user input command
@@ -169,12 +188,18 @@ func (pi *interpreter) dataConnection() (io.ReadWriteCloser, error) {
 }
 
 func (pi *interpreter) changeDir(dst string) (int, error) {
-	dstPath := filepath.Join(pi.wd, dst)
-	if _, err := os.Stat(dstPath); os.IsNotExist(err) {
+	var err error
+	fi := new(fileInfo)
+	if fi, err = pi.checkPathExist(dst); os.IsNotExist(err) {
 		pi.printf("%v: No such file or directory ", dst)
 		return StatusBadArguments, nil
+	} else if err != nil {
+		log.Println(err)
+		pi.printf("%v: server error ", dst)
+		return StatusFileUnavailable, nil
 	}
-	pi.wd = dstPath
+
+	pi.wd = fi.path
 	return StatusRequestedFileActionOK, nil
 }
 
@@ -215,23 +240,35 @@ func (pi *interpreter) list(dst string) (int, error) {
 	}
 	defer conn.Close()
 
-	var dstPath string
-	if _, err := os.Stat(dst); os.IsNotExist(err) {
-		dstPath = filepath.Join(pi.wd, dst)
-	} else {
-		dstPath = dst
-	}
+	fi := new(fileInfo)
 
-	fi, err := ioutil.ReadDir(dstPath)
-	if err != nil {
+	if fi, err = pi.checkPathExist(dst); os.IsNotExist(err) {
 		pi.printf("%v: No such file or directory ", dst)
 		return StatusBadArguments, nil
+	} else if err != nil {
+		log.Println(err)
+		pi.printf("%v: server error ", dst)
+		return StatusFileUnavailable, nil
 	}
 
-	pi.printf("%v\r\n", StatusAboutToSend)
+	if fi.info.IsDir() {
+		files, err := ioutil.ReadDir(fi.path)
+		if err != nil {
+			pi.printf("%v: No such file or directory ", dst)
+			return StatusBadArguments, nil
+		}
 
-	for _, f := range fi {
-		_, err := fmt.Fprint(conn, f.Name(), "\n")
+		pi.printf("%v\r\n", StatusAboutToSend)
+
+		for _, f := range files {
+			_, err := fmt.Fprint(conn, f.Name(), "\n")
+			if err != nil {
+				return StatusBadCommand, err
+			}
+		}
+	} else {
+		pi.printf("%v\r\n", StatusAboutToSend)
+		_, err := fmt.Fprint(conn, fi.info.Name(), "\n")
 		if err != nil {
 			return StatusBadCommand, err
 		}
