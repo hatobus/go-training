@@ -215,7 +215,12 @@ func (pi *interpreter) list(dst string) (int, error) {
 	}
 	defer conn.Close()
 
-	dstPath := filepath.Join(pi.wd, dst)
+	var dstPath string
+	if _, err := os.Stat(dst); os.IsNotExist(err) {
+		dstPath = filepath.Join(pi.wd, dst)
+	} else {
+		dstPath = dst
+	}
 
 	fi, err := ioutil.ReadDir(dstPath)
 	if err != nil {
