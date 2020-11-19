@@ -199,6 +199,11 @@ func (pi *interpreter) changeDir(dst string) (int, error) {
 		return StatusFileUnavailable, nil
 	}
 
+	if !fi.info.IsDir() {
+		pi.printf("%v: is not directory ", fi.path)
+		return StatusBadArguments, nil
+	}
+
 	pi.wd = fi.path
 	return StatusRequestedFileActionOK, nil
 }
