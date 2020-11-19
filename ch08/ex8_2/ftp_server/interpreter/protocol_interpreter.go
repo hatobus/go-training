@@ -49,11 +49,10 @@ func (pi *interpreter) setWorkingDir() error {
 }
 
 func (pi *interpreter) checkPathExist(path string) (*fileInfo, error) {
-	var dstPath string
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		dstPath = filepath.Join(pi.wd, path)
-	} else if !os.IsNotExist(err) {
+	dstPath := filepath.Join(pi.wd, path)
+	if _, err := os.Stat(dstPath); os.IsNotExist(err) {
 		dstPath = path
+	} else if !os.IsNotExist(err) {
 	} else {
 		return nil, err
 	}
