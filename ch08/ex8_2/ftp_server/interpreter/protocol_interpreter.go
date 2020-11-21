@@ -111,8 +111,13 @@ func (pi *interpreter) Run() {
 			} else {
 				statusCode, err = pi.changeDir(args[0])
 			}
-		case command.DELE:
-			statusCode = StatusNotImplemented
+		case command.RMD, command.XRMD:
+			if len(args) != 1 {
+				_, err = pi.printf("invalid arguments, rm commands must be \"rm path/to/destination\" ")
+				statusCode = StatusBadArguments
+			} else {
+				statusCode, err = pi.delete(args[0])
+			}
 		case command.HELP:
 			statusCode = StatusHelp
 		case command.LIST:
@@ -279,6 +284,31 @@ func (pi *interpreter) list(dst string) (int, error) {
 	}
 
 	return StatusClosingDataConnection, nil
+}
+
+func (pi *interpreter) delete(dst string) (int, error) {
+	var err error
+	fi := new(fileInfo)
+	if fi, err = pi.checkPathExist(dst); os.IsNotExist(err) {
+		pi.printf("%v: No such file or directory ", dst)
+		return StatusBadArguments, nil
+	} else if err != nil {
+		log.Println(err)
+		pi.printf("%v: server error ", dst)
+		return StatusFileUnavailable, nil
+	}
+
+	if fi.info.IsDir() {
+		if err := os.RemoveAll(fi.path); err != nil {
+			return StatusActionAborted, nil
+		}
+	} else {
+		if err := os.Remove(fi.path); err != nil {
+			return StatusActionAborted, nil
+		}
+	}
+
+	return StatusCommandOK, nil
 }
 
 func (pi *interpreter) get() {

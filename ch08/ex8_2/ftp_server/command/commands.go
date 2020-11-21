@@ -2,7 +2,8 @@ package command
 
 const (
 	CWD  = iota // change working directory
-	DELE        // delete file or directory
+	RMD         // delete file
+	XRMD        // delete file or directory
 	HELP        // show able to use commands
 	LIST        // show file or directory
 	PWD         // print working directory
@@ -18,7 +19,8 @@ const (
 
 var CMD = map[string]int{
 	"CWD":  CWD,
-	"DELE": DELE,
+	"RMD":  RMD,
+	"XRMD": XRMD,
 	"HELP": HELP,
 	"LIST": LIST,
 	"PWD":  PWD,
