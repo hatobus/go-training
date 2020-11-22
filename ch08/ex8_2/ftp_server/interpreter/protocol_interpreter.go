@@ -16,10 +16,12 @@ import (
 )
 
 type interpreter struct {
-	conn     net.Conn // PI (Protocol interpreter) connection
-	wd       string
-	prevCmd  int
-	hostPort string
+	conn         net.Conn // PI (Protocol interpreter) connection
+	wd           string
+	prevCmd      int
+	listener     net.Listener
+	binaryOption bool
+	hostPort     string
 }
 
 type fileInfo struct {
@@ -59,6 +61,18 @@ func (pi *interpreter) checkPathExist(path string) (*fileInfo, error) {
 
 	fi, err := os.Stat(dstPath)
 	return &fileInfo{fi, dstPath}, err
+}
+
+func (pi *interpreter) dataType(argument []string) (int, error) {
+	switch strings.ToUpper(strings.Join(argument, " ")) {
+	case "A", "A N":
+		pi.binaryOption = false
+	case "I", "L 8":
+		pi.binaryOption = true
+	default:
+		return StatusNotImplementedParameter, fmt.Errorf("unsupported data type. Supported types is \"A, A N, I, L 8\"")
+	}
+	return StatusCommandOK, nil
 }
 
 // Start to wait user input command
@@ -132,7 +146,11 @@ func (pi *interpreter) Run() {
 		case command.PWD:
 			statusCode, err = pi.printWorkingDir()
 		case command.RETR:
-			statusCode = StatusNotImplemented
+			if len(args) != 1 {
+				_, err = pi.printf("invalid arguments \"PORT\" commands needs address arguments ")
+				statusCode = StatusBadArguments
+			}
+			statusCode, err = pi.retr(args[0])
 		case command.USER, command.PASS, command.ACCT:
 			// 今回ログインは実装しない
 			statusCode = StatusLoggedIn
@@ -147,6 +165,13 @@ func (pi *interpreter) Run() {
 			}
 		case command.LPRT:
 			continue
+		case command.TYPE:
+			if len(args) == 1 || len(args) == 2 {
+				statusCode, err = pi.dataType(args)
+			} else {
+				_, err = pi.printf("invalid argument length, TYPE takes 1 or 2 arguments. ")
+				statusCode = StatusBadArguments
+			}
 		case command.QUIT:
 			statusCode = StatusClosing
 			break
@@ -181,6 +206,11 @@ func (pi *interpreter) dataConnection() (io.ReadWriteCloser, error) {
 	switch pi.prevCmd {
 	case command.PORT:
 		conn, err = net.Dial("tcp", pi.hostPort)
+		if err != nil {
+			return nil, err
+		}
+	case command.PASV:
+		conn, err = pi.listener.Accept()
 		if err != nil {
 			return nil, err
 		}
@@ -311,10 +341,79 @@ func (pi *interpreter) delete(dst string) (int, error) {
 	return StatusCommandOK, nil
 }
 
-func (pi *interpreter) get() {
-	panic("not impl")
+func (pi *interpreter) retr(dst string) (int, error) {
+	var err error
+	fi := new(fileInfo)
+	if fi, err = pi.checkPathExist(dst); os.IsNotExist(err) {
+		pi.printf("%v: No such file or directory ", dst)
+		return StatusBadArguments, nil
+	} else if err != nil {
+		log.Println(err)
+		pi.printf("%v: server error ", dst)
+		return StatusFileUnavailable, nil
+	}
+
+	var retrFile string
+
+	if fi.info.IsDir() {
+		pi.printf("%v is directory, please input files ", fi.path)
+		return StatusFileUnavailable, nil
+	} else {
+		retrFile = fi.path
+	}
+
+	pi.printf("150 sending. \r\n")
+
+	conn, err := pi.dataConnection()
+	if err != nil {
+		pi.printf("Data connection open failed ")
+		return StatusFileUnavailable, nil
+	}
+
+	err = pi.send(conn, retrFile)
+	if err != nil {
+		log.Println(err)
+		return StatusFileUnavailable, err
+	}
+	conn.Close()
+
+	return StatusClosingDataConnection, nil
 }
 
-func (pi *interpreter) close() {
-	panic("not impl")
+func (pi *interpreter) send(conn io.ReadWriteCloser, file string) error {
+	f, err := os.Open(file)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	if pi.binaryOption {
+		_, err = io.Copy(conn, f)
+		if err != nil {
+			log.Println(err)
+			pi.printf("file unavailable ")
+			return fmt.Errorf("io copy failed")
+		}
+	} else {
+		r := bufio.NewReader(f)
+		w := bufio.NewWriter(conn)
+
+		for {
+			l, isPrefix, err := r.ReadLine()
+			if err != nil {
+				if err == io.EOF {
+					break
+				}
+				log.Println(err)
+				pi.printf("file unavailable ")
+				return fmt.Errorf("read line failed")
+			}
+
+			w.Write(l)
+			if !isPrefix {
+				w.Write([]byte("\r\n"))
+			}
+		}
+	}
+	return nil
 }

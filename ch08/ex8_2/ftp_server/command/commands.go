@@ -11,10 +11,12 @@ const (
 	RETR        // Retrieve remote file
 	USER        // user login
 	PASS        // pass command
+	PASV        // pasv command
 	ACCT        // acct command
 	PORT        // port command
 	SYST        // syst command
 	LPRT        // LPRT command
+	TYPE        // TYPE command
 )
 
 var CMD = map[string]int{
@@ -28,8 +30,10 @@ var CMD = map[string]int{
 	"RETR": RETR,
 	"USER": USER,
 	"PASS": PASS,
+	"PASV": PASV,
 	"ACCT": ACCT,
 	"PORT": PORT,
 	"SYST": SYST,
 	"LPRT": LPRT,
+	"TYPE": TYPE,
 }
