@@ -10,20 +10,23 @@ import (
 	"time"
 )
 
-func echo(c net.Conn, shout string, delay time.Duration) {
-	fmt.Fprintln(c, "\t", strings.ToUpper(shout))
-	time.Sleep(delay)
-	fmt.Fprintln(c, "\t", shout)
-	time.Sleep(delay)
-	fmt.Fprintln(c, "\t", strings.ToLower(shout))
-}
+var delay = 1 * time.Second
 
 func handleConn(c net.Conn) {
 	var wg sync.WaitGroup
 	input := bufio.NewScanner(c)
+	// WaitGroupを値渡しするとgoroutineがdeadlockします
+	// ポインタ渡しするかクロージャでなんとかする
 	for input.Scan() {
 		wg.Add(1)
-		go echo(c, input.Text(), 1*time.Second)
+		go func(shout string) {
+			fmt.Fprintln(c, "\t", strings.ToUpper(shout))
+			time.Sleep(delay)
+			fmt.Fprintln(c, "\t", shout)
+			time.Sleep(delay)
+			fmt.Fprintln(c, "\t", strings.ToLower(shout))
+			wg.Done()
+		}(input.Text())
 	}
 	wg.Wait()
 	c.Close()
