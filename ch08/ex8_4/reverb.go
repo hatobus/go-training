@@ -19,16 +19,14 @@ func echo(c net.Conn, shout string, delay time.Duration) {
 }
 
 func handleConn(c net.Conn) {
+	var wg sync.WaitGroup
 	input := bufio.NewScanner(c)
 	for input.Scan() {
+		wg.Add(1)
 		go echo(c, input.Text(), 1*time.Second)
 	}
-	c.Close()
-}
-
-func wgCloser(wg sync.WaitGroup, s chan<- struct{}) {
 	wg.Wait()
-	close(s)
+	c.Close()
 }
 
 func main() {
@@ -37,19 +35,12 @@ func main() {
 		log.Fatal(err)
 	}
 
-	finished := make(chan struct{})
-	var wg sync.WaitGroup
-
 	for {
-		log.Println("for")
-		wg.Add(1)
 		conn, err := l.Accept()
 		if err != nil {
 			log.Fatal(err)
 			continue
 		}
 		go handleConn(conn)
-		go wgCloser(wg, finished)
-		log.Println("end")
 	}
 }
