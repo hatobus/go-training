@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"math"
 	"os"
@@ -34,7 +35,7 @@ func main() {
 	concurrent(8, f)
 }
 
-func concurrent(workers int, buf *os.File) {
+func concurrent(workers int, buf io.Writer) {
 	if buf == nil {
 		buf = os.Stdout
 	}
@@ -81,7 +82,7 @@ func concurrent(workers int, buf *os.File) {
 	fmt.Fprintln(buf, "</svg>")
 }
 
-func naive(buf *os.File) {
+func naive(buf io.Writer) {
 	if buf == nil {
 		buf = os.Stdout
 	}

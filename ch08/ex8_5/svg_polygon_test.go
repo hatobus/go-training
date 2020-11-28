@@ -2,14 +2,13 @@ package main
 
 import (
 	"fmt"
-	"os"
+	"io/ioutil"
 	"testing"
 )
 
 func BenchmarkSVGPolygon(b *testing.B) {
 	b.Run("naive", func(b *testing.B) {
-		f, _ := os.Open("/dev/null")
-		naive(f)
+		naive(ioutil.Discard)
 	})
 
 	var worker = 1
@@ -18,8 +17,7 @@ func BenchmarkSVGPolygon(b *testing.B) {
 		worker *= 2
 		b.Run(fmt.Sprintf("Concurrent worker: %v", worker), func(b *testing.B) {
 			for j := 0; j < b.N; j++ {
-				f, _ := os.Open("/dev/null")
-				concurrent(worker, f)
+				concurrent(worker, ioutil.Discard)
 			}
 		})
 	}
