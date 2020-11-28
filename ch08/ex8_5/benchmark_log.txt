@@ -1,0 +1,19 @@
+goos: linux
+goarch: amd64
+pkg: github.com/hatobus/go-training/ch08/ex8_5
+BenchmarkSVGPolygon
+BenchmarkSVGPolygon/naive
+BenchmarkSVGPolygon/naive-8         	1000000000	         0.0237 ns/op
+BenchmarkSVGPolygon/Concurrent_worker:_2
+BenchmarkSVGPolygon/Concurrent_worker:_2-8         	      39	  32669485 ns/op
+BenchmarkSVGPolygon/Concurrent_worker:_4
+BenchmarkSVGPolygon/Concurrent_worker:_4-8         	      42	  29450098 ns/op
+BenchmarkSVGPolygon/Concurrent_worker:_8
+BenchmarkSVGPolygon/Concurrent_worker:_8-8         	      33	  33655969 ns/op
+BenchmarkSVGPolygon/Concurrent_worker:_16
+BenchmarkSVGPolygon/Concurrent_worker:_16-8        	      34	  33742733 ns/op
+BenchmarkSVGPolygon/Concurrent_worker:_32
+BenchmarkSVGPolygon/Concurrent_worker:_32-8        	      32	  34593718 ns/op
+PASS
+
+Process finished with exit code 0

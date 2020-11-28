@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"math"
+	"os"
 )
 
 const (
@@ -25,10 +27,17 @@ type values struct {
 }
 
 func main() {
-	concurrent(8)
+	f, err := os.Open("/dev/null")
+	if err != nil {
+		log.Fatal(err)
+	}
+	concurrent(8, f)
 }
 
-func concurrent(workers int) {
+func concurrent(workers int, buf *os.File) {
+	if buf == nil {
+		buf = os.Stdout
+	}
 	poschan := make(chan *position, workers)
 	calcchan := make(chan *values, workers)
 
@@ -57,23 +66,27 @@ func concurrent(workers int) {
 		close(poschan)
 	}()
 
-	fmt.Printf("<svg xmlns='http://www.w3.org/2000/svg' "+
+	fmt.Fprintf(buf, "<svg xmlns='http://www.w3.org/2000/svg' "+
 		"style='stroke: grey; fill: white; stroke-width: 0.7' "+
 		"width='%d' height='%d'>", width, height)
 
 	for i := 0; i < cells*cells; i++ {
 		points := <-calcchan
 		if points != nil {
-			fmt.Printf("<polygon points='%g,%g %g,%g %g,%g %g,%g'/>\n",
+			fmt.Fprintf(buf, "<polygon points='%g,%g %g,%g %g,%g %g,%g'/>\n",
 				points.ax, points.ay, points.bx, points.by, points.cx, points.cy, points.dx, points.dy)
 		}
 	}
 
-	fmt.Println("</svg>")
+	fmt.Fprintln(buf, "</svg>")
 }
 
-func naive() {
-	fmt.Printf("<svg xmlns='http://www.w3.org/2000/svg' "+
+func naive(buf *os.File) {
+	if buf == nil {
+		buf = os.Stdout
+	}
+
+	fmt.Fprintf(buf, "<svg xmlns='http://www.w3.org/2000/svg' "+
 		"style='stroke: grey; fill: white; stroke-width: 0.7' "+
 		"width='%d' height='%d'>", width, height)
 	for i := 0; i < cells; i++ {
@@ -83,13 +96,13 @@ func naive() {
 			cx, cy := corner(i, j+1)
 			dx, dy := corner(i+1, j+1)
 			if validateNumericValue(ax, ay, bx, by, cx, cy, dx, dy) {
-				fmt.Printf("<polygon points='%g,%g %g,%g %g,%g %g,%g'/>\n",
+				fmt.Fprintf(buf, "<polygon points='%g,%g %g,%g %g,%g %g,%g'/>\n",
 					ax, ay, bx, by, cx, cy, dx, dy)
 			}
 		}
 	}
 
-	fmt.Println("</svg>")
+	fmt.Fprintln(buf, "</svg>")
 }
 
 func validateNumericValue(values ...float64) bool {
