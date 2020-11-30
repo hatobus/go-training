@@ -9,7 +9,6 @@ import (
 	"time"
 )
 
-var delay = 1 * time.Second
 var timeOut = 10 * time.Second
 
 func echo(c net.Conn, shout string, delay time.Duration) {
