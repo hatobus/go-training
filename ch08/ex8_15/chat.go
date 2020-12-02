@@ -48,7 +48,7 @@ func broadcaster() {
 }
 
 func handleConn(conn net.Conn) {
-	out := make(chan string, 10)
+	out := make(chan string, 16)
 	go clientWriter(conn, out)
 
 	in := make(chan string)
