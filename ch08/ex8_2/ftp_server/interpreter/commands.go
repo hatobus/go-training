@@ -104,7 +104,7 @@ func (pi *interpreter) retr(dst string) (int, error) {
 	conn, err := pi.dataConnection()
 	if err != nil {
 		pi.printf("Data connection open failed ")
-		return StatusFileUnavailable, nil
+		return StatusCanNotOpenDataConnection, nil
 	}
 
 	err = pi.send(conn, retrFile)
@@ -113,6 +113,32 @@ func (pi *interpreter) retr(dst string) (int, error) {
 		return StatusFileUnavailable, err
 	}
 	conn.Close()
+
+	return StatusClosingDataConnection, nil
+}
+
+func (pi *interpreter) store(fname string) (int, error) {
+	f, err := os.Create(fname)
+	if err != nil {
+		pi.printf("file can't created ")
+		return StatusFileUnavailable, err
+	}
+
+	pi.printf("150 sending \r\n")
+
+	conn, err := pi.dataConnection()
+	if err != nil {
+		pi.printf("data connection open failed ")
+		return StatusCanNotOpenDataConnection, err
+	}
+
+	defer conn.Close()
+
+	_, err = io.Copy(f, conn)
+	if err != nil {
+		pi.printf("file can't wrote ")
+		return StatusFileActionIgnored, err
+	}
 
 	return StatusClosingDataConnection, nil
 }

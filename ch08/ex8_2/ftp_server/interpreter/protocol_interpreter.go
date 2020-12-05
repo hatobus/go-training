@@ -149,8 +149,16 @@ func (pi *interpreter) Run() {
 			if len(args) != 1 {
 				_, err = pi.printf("invalid arguments \"PORT\" commands needs address arguments ")
 				statusCode = StatusBadArguments
+			} else {
+				statusCode, err = pi.retr(args[0])
 			}
-			statusCode, err = pi.retr(args[0])
+		case command.STOR:
+			if len(args) == 0 {
+				_, err = pi.printf("invalid argument \"STOR\" commands needs upload file name")
+				statusCode = StatusBadArguments
+			} else {
+				statusCode, err = pi.store(args)
+			}
 		case command.USER, command.PASS, command.ACCT:
 			// 今回ログインは実装しない
 			statusCode = StatusLoggedIn

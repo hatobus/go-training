@@ -9,6 +9,7 @@ const (
 	PWD         // print working directory
 	QUIT        // close FTP connection
 	RETR        // Retrieve remote file
+	STOR        // Store local file
 	USER        // user login
 	PASS        // pass command
 	PASV        // pasv command
@@ -28,6 +29,7 @@ var CMD = map[string]int{
 	"PWD":  PWD,
 	"QUIT": QUIT,
 	"RETR": RETR,
+	"STOR": STOR,
 	"USER": USER,
 	"PASS": PASS,
 	"PASV": PASV,
