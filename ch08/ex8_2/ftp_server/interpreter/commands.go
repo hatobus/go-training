@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
 )
 
 func (pi *interpreter) list(dst string) (int, error) {
@@ -118,7 +119,15 @@ func (pi *interpreter) retr(dst string) (int, error) {
 }
 
 func (pi *interpreter) store(fname string) (int, error) {
-	f, err := os.Create(fname)
+	fpath, isCorrectPath := pi.isCorrectlyPath(fname)
+	if !isCorrectPath {
+		pi.printf("%v is not correctly remote path ", fpath)
+		return StatusFileUnavailable, fmt.Errorf("invalid filepath")
+	}
+
+	log.Println(fpath, "saved")
+
+	f, err := os.Create(filepath.Join(pi.wd, filepath.Base(fpath)))
 	if err != nil {
 		pi.printf("file can't created ")
 		return StatusFileUnavailable, err

@@ -63,6 +63,28 @@ func (pi *interpreter) checkPathExist(path string) (*fileInfo, error) {
 	return &fileInfo{fi, dstPath}, err
 }
 
+func (pi *interpreter) isCorrectlyPath(filePath string) (string, bool) {
+	dir := filepath.Dir(filePath)
+	if dir == "." {
+		return filepath.Join(pi.wd, filePath), true
+	}
+
+	fname := filepath.Base(filePath)
+
+	// check rel path
+	if _, err := os.Stat(filepath.Join(pi.wd, dir)); !os.IsNotExist(err) {
+		abs, _ := filepath.Abs(filepath.Join(pi.wd, dir))
+		return filepath.Join(abs, fname), true
+	}
+
+	// check abs path
+	if _, err := os.Stat(dir); !os.IsNotExist(err) {
+		return filepath.Join(dir, fname), true
+	}
+
+	return "", false
+}
+
 func (pi *interpreter) dataType(argument []string) (int, error) {
 	switch strings.ToUpper(strings.Join(argument, " ")) {
 	case "A", "A N":
@@ -157,7 +179,7 @@ func (pi *interpreter) Run() {
 				_, err = pi.printf("invalid argument \"STOR\" commands needs upload file name")
 				statusCode = StatusBadArguments
 			} else {
-				statusCode, err = pi.store(args)
+				statusCode, err = pi.store(args[0])
 			}
 		case command.USER, command.PASS, command.ACCT:
 			// 今回ログインは実装しない
