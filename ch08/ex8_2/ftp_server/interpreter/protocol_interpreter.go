@@ -175,11 +175,14 @@ func (pi *interpreter) Run() {
 				statusCode, err = pi.retr(args[0])
 			}
 		case command.STOR:
-			if len(args) == 0 {
+			switch len(args) {
+			case 1:
+				statusCode, err = pi.store(args[0], pi.wd)
+			case 2:
+				statusCode, err = pi.store(args[0], args[1])
+			default:
 				_, err = pi.printf("invalid argument \"STOR\" commands needs upload file name")
 				statusCode = StatusBadArguments
-			} else {
-				statusCode, err = pi.store(args[0])
 			}
 		case command.USER, command.PASS, command.ACCT:
 			// 今回ログインは実装しない

@@ -118,16 +118,22 @@ func (pi *interpreter) retr(dst string) (int, error) {
 	return StatusClosingDataConnection, nil
 }
 
-func (pi *interpreter) store(fname string) (int, error) {
-	fpath, isCorrectPath := pi.isCorrectlyPath(fname)
-	if !isCorrectPath {
-		pi.printf("%v is not correctly remote path ", fpath)
+func (pi *interpreter) store(fname, savePath string) (int, error) {
+	fpath, isCorrectLocalPath := pi.isCorrectlyPath(fname)
+	if !isCorrectLocalPath {
+		pi.printf("%v is not correctly local path ", fpath)
 		return StatusFileUnavailable, fmt.Errorf("invalid filepath")
 	}
 
 	log.Println(fpath, "saved")
 
-	f, err := os.Create(filepath.Join(pi.wd, filepath.Base(fpath)))
+	savedir, isCorrectSavePath := pi.isCorrectlyPath(savePath)
+	if !isCorrectSavePath {
+		pi.printf("%v is not correctly remote path ", savePath)
+		return StatusFileUnavailable, fmt.Errorf("invalid filepath")
+	}
+
+	f, err := os.Create(filepath.Join(savedir, filepath.Base(fpath)))
 	if err != nil {
 		pi.printf("file can't created ")
 		return StatusFileUnavailable, err
