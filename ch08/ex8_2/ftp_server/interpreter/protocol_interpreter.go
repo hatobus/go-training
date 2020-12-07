@@ -175,12 +175,9 @@ func (pi *interpreter) Run() {
 				statusCode, err = pi.retr(args[0])
 			}
 		case command.STOR:
-			switch len(args) {
-			case 1:
-				statusCode, err = pi.store(args[0], pi.wd)
-			case 2:
-				statusCode, err = pi.store(args[0], args[1])
-			default:
+			if len(args) == 1 {
+				statusCode, err = pi.store(args[0])
+			} else {
 				_, err = pi.printf("invalid argument \"STOR\" commands needs upload file name")
 				statusCode = StatusBadArguments
 			}
