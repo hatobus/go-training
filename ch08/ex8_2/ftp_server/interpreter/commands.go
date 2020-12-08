@@ -186,6 +186,7 @@ func (pi *interpreter) send(conn io.ReadWriteCloser, file string) error {
 				w.Write([]byte("\r\n"))
 			}
 		}
+		w.Flush()
 	}
 	return nil
 }
