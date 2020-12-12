@@ -2,10 +2,6 @@ package main
 
 import (
 	"bytes"
-	"crypto/sha256"
-	"crypto/sha512"
-	"encoding/hex"
-	"fmt"
 	"io"
 	"os/exec"
 	"testing"
@@ -17,73 +13,36 @@ func TestSHA256(t *testing.T) {
 	type testData struct {
 		mode   string
 		input  []string
-		output func([]string) string
+		output string
 	}
 
 	testCases := map[string]testData{
 		"sha256で動かす": {
 			mode:  SHA256MODE,
 			input: []string{"a", "b", "c"},
-			output: func(m []string) string {
-				var out string
-				for _, in := range m {
-					hash := sha256.Sum256([]byte(in))
-					out += fmt.Sprintf("%v\n", hex.EncodeToString(hash[:]))
-				}
-				return out
-			},
+			output: "ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb\n" +
+				"3e23e8160039594a33894f6564e1b1348bbd7a0088d42c4acb73eeaed59c009d\n" +
+				"2e7d2c03a9507ae265ecf5b5356885a53393a2029d241394997265a1a25aefc6\n",
 		},
 		"sha384で動かす": {
 			mode:  SHA384MODE,
 			input: []string{"こんにちは世界", "Hello World"},
-			output: func(m []string) string {
-				var out string
-				for _, in := range m {
-					hash := sha512.Sum384([]byte(in))
-					out += fmt.Sprintf("%v\n", hex.EncodeToString(hash[:]))
-				}
-				return out
-			},
+			output: "c1c1a6214a2c7f2050bb93a8a7fdde6a369bae96a166a3ed6c1fd25ea9d8339bca528f140472bf3c803b0e77dab9dd72\n" +
+				"99514329186b2f6ae4a1329e7ee6c610a729636335174ac6b740f9028396fcc803d0e93863a7c3d90f86beee782f4f3f\n",
 		},
 		"sha512で動かす": {
 			mode:  SHA512MODE,
 			input: []string{"こんにちは", "Hello", "你好"},
-			output: func(m []string) string {
-				var out string
-				for _, in := range m {
-					hash := sha512.Sum512([]byte(in))
-					out += fmt.Sprintf("%v\n", hex.EncodeToString(hash[:]))
-				}
-				return out
-			},
+			output: "bb2b0b573e976d4240fd775e3b0d8c8fcbd058d832fe451214db9d604dc7b3817f0b1b030d27488c96fc0e008228172acdd5e15c26f6543d5f48dc75d8d9a662\n" +
+				"3615f80c9d293ed7402687f94b22d58e529b8cc7916f8fac7fddf7fbd5af4cf777d3d795a7a00a16bf7e7f3fb9561ee9baae480da9fe7a18769e71886b03f315\n" +
+				"5232181bc0d9888f5c9746e410b4740eb461706ba5dacfbc93587cecfc8d068bac7737e92870d6745b11a25e9cd78b55f4ffc706f73cfcae5345f1b53fb8f6b5\n",
 		},
 		"デフォルトはsha256": {
 			mode:  "",
 			input: []string{"a", "b", "c"},
-			output: func(m []string) string {
-				var out string
-				for _, in := range m {
-					hash := sha256.Sum256([]byte(in))
-					out += fmt.Sprintf("%v\n", hex.EncodeToString(hash[:]))
-				}
-				return out
-			},
-		},
-		"長い文字列でも対応する": {
-			mode: SHA256MODE,
-			input: []string{
-				"死のうと思っていた。ことしの正月、よそから着物を一反もらった。お年玉としてである。着物の布地は麻であった。鼠色のこまかい縞目しまめが織りこめられていた。これは夏に着る着物であろう。夏まで生きていようと思った。",
-				"親譲りの無鉄砲で子供の時から損ばかりしている。小学校に居る時分学校の二階から飛び降りて一週間程腰を抜かした事がある。",
-				"えたいの知れない不吉な塊が私の心を始終圧えつけていた。焦躁と言おうか、嫌悪と言おうか――酒を飲んだあとに宿酔があるように、酒を毎日飲んでいると宿酔に相当した時期がやって来る。",
-			},
-			output: func(m []string) string {
-				var out string
-				for _, in := range m {
-					hash := sha256.Sum256([]byte(in))
-					out += fmt.Sprintf("%v\n", hex.EncodeToString(hash[:]))
-				}
-				return out
-			},
+			output: "ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb\n" +
+				"3e23e8160039594a33894f6564e1b1348bbd7a0088d42c4acb73eeaed59c009d\n" +
+				"2e7d2c03a9507ae265ecf5b5356885a53393a2029d241394997265a1a25aefc6\n",
 		},
 	}
 
@@ -118,7 +77,7 @@ func TestSHA256(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			if diff := cmp.Diff(stdout.String(), tc.output(tc.input)); diff != "" {
+			if diff := cmp.Diff(stdout.String(), tc.output); diff != "" {
 				t.Fatalf("invalid output, diff: %v", diff)
 			}
 		})
