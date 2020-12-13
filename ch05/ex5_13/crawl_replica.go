@@ -39,6 +39,9 @@ func breadthFirst(worklist []string) error {
 func crawl(url string) ([]string, error) {
 	err := download(url)
 	if err != nil {
+		if err.Error() == "different hostname" {
+			return nil, nil
+		}
 		return nil, err
 	}
 
@@ -62,7 +65,7 @@ func download(rawurl string) error {
 
 	// hostnameが違うサイトはダウンロードしない
 	if hostName != u.Host {
-		return nil
+		return fmt.Errorf("different hostname")
 	}
 
 	var fname string
