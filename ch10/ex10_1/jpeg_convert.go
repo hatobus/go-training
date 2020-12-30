@@ -14,7 +14,7 @@ import (
 
 var (
 	format   = flag.String("format", "png", "format with output ")
-	filename = flag.String("name", "out", "output filename")
+	filename = flag.String("name", "out.png", "output filename (rel path)")
 )
 
 func main() {
@@ -25,18 +25,20 @@ func main() {
 		os.Exit(1)
 	}
 
+	wd, _ := os.Getwd()
 	var saveFileName string
 	ext := filepath.Ext(*filename)
-	if ext != *format {
-		saveFileName = filepath.Dir(*filename) + filepath.Base(*filename) + "." + ext
+	if ext != "."+*format {
+		// filenameの拡張子を排除した部分
+		n := filepath.Base((*filename)[:len(*filename)-len(filepath.Ext(*filename))])
+		saveFileName = filepath.Join(wd, n+"."+*format)
 	} else {
-		saveFileName = *filename
+		saveFileName = filepath.Join(wd, *filename)
 	}
 
-	wd, _ := os.Getwd()
-	savedir := filepath.Join(wd, saveFileName)
+	fmt.Println("output filename:", saveFileName)
 
-	f, err := os.Open(savedir)
+	f, err := os.Create(saveFileName)
 	if err != nil {
 		fmt.Fprint(os.Stderr, err)
 		os.Exit(1)
