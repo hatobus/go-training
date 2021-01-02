@@ -1,12 +1,13 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"image"
-	_ "image/gif"
+	"image/gif"
 	"image/jpeg"
-	_ "image/png"
+	"image/png"
 	"io"
 	"os"
 	"path/filepath"
@@ -45,18 +46,28 @@ func main() {
 	}
 	defer f.Close()
 
-	if err := toJPEG(os.Stdin, f); err != nil {
+	if err := toJPEG(os.Stdin, f, *format); err != nil {
 		fmt.Fprintf(os.Stderr, "jpeg: %v\n", err)
 		os.Exit(1)
 	}
 }
 
-func toJPEG(in io.Reader, out io.Writer) error {
+func toJPEG(in io.Reader, out io.Writer, ext string) error {
 	img, kind, err := image.Decode(in)
 	if err != nil {
 		return err
 	}
 
 	fmt.Fprintln(os.Stderr, "Input format = ", kind)
-	return jpeg.Encode(out, img, &jpeg.Options{Quality: 95})
+
+	switch ext {
+	case "png":
+		return png.Encode(out, img)
+	case "jpg":
+		return jpeg.Encode(out, img, &jpeg.Options{Quality: 95})
+	case "gif":
+		return gif.Encode(out, img, &gif.Options{})
+	default:
+		return errors.New("invalid encode extension")
+	}
 }
