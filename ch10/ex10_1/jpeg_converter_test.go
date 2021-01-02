@@ -33,6 +33,16 @@ func TestJpegConverter(t *testing.T) {
 			fileNameOption: "",
 			expectExt:      "png",
 		},
+		"nameオプションが付いている場合": {
+			formatOption:   "",
+			fileNameOption: "name-option",
+			expectExt:      "png",
+		},
+		"nameオプションとformatオプションが付いている": {
+			formatOption:   "gif",
+			fileNameOption: "gif-image",
+			expectExt:      "gif",
+		},
 	}
 
 	for testName, tc := range testCases {
