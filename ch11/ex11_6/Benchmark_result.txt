@@ -1,0 +1,9 @@
+goos: linux
+goarch: amd64
+pkg: github.com/hatobus/go-training/ch11/ex11_6
+BenchmarkPopCountTable
+BenchmarkPopCountTable-8      	311876356	         3.63 ns/op
+BenchmarkPopCountNaive
+BenchmarkPopCountNaive-8      	24005281	        46.5 ns/op
+BenchmarkPopCountBitmagic
+BenchmarkPopCountBitmagic-8   	134916109	         8.74 ns/op

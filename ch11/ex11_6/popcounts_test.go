@@ -3,7 +3,8 @@ package ex11_6
 import (
 	"testing"
 
-	ex2_3 "github.com/hatobus/go-training/ch02/ex2_3/popcount"
+	"github.com/hatobus/go-training/ch02/ex2_4"
+	"github.com/hatobus/go-training/ch02/ex2_5"
 )
 
 func doBench(b *testing.B, f func(uint64) int) {
@@ -17,5 +18,9 @@ func BenchmarkPopCountTable(b *testing.B) {
 }
 
 func BenchmarkPopCountNaive(b *testing.B) {
-	doBench(b, ex2_3.PopCount)
+	doBench(b, ex2_4.PopCount)
+}
+
+func BenchmarkPopCountBitmagic(b *testing.B) {
+	doBench(b, ex2_5.PopCount)
 }
