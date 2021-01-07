@@ -67,19 +67,16 @@ func (s *WordIntSet) String() string {
 }
 
 func (s *WordIntSet) Len() int {
-	return len(s.words)
+	count := 0
+	for _, word := range s.words {
+		count += popcount(word)
+	}
+	return count
 }
 
 func (s *WordIntSet) Remove(x int) {
-	t := []uint64{}
-
-	for _, word := range s.words {
-		if word != uint64(x) {
-			t = append(t, word)
-		}
-	}
-
-	s.words = t
+	word, bits := x/64, uint(x%64)
+	s.words[word] &^= 1 << bits
 }
 
 func (s *WordIntSet) Clear() {
@@ -90,4 +87,13 @@ func (s *WordIntSet) Copy() IntSet {
 	return &WordIntSet{
 		words: s.words,
 	}
+}
+
+func popcount(x uint64) int {
+	cnt := 0
+	for x != 0 {
+		cnt++
+		x &= x - 1
+	}
+	return cnt
 }
