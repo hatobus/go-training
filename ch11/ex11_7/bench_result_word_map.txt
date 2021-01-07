@@ -1,0 +1,29 @@
+goos: linux
+goarch: amd64
+pkg: github.com/hatobus/go-training/ch11/ex11_7
+BenchmarkWordIntSetHas100-8           	50853950	        24.1 ns/op
+BenchmarkWordIntSetHas1000-8          	47615120	        26.1 ns/op
+BenchmarkWordIntSetHas10000-8         	51213770	        26.0 ns/op
+BenchmarkWordIntSetAdd100-8           	  105445	     13184 ns/op
+BenchmarkWordIntSetAdd1000-8          	   33601	     42609 ns/op
+BenchmarkWordIntSetAdd10000-8         	    3684	    307954 ns/op
+BenchmarkWordIntSetUnionWith100-8     	167682538	         6.71 ns/op
+BenchmarkWordIntSetUnionWith1000-8    	53458573	        22.1 ns/op
+BenchmarkWordIntSetUnionWith10000-8   	 6279646	       205 ns/op
+BenchmarkWordIntSetCopy100-8          	27371625	        39.3 ns/op
+BenchmarkWordIntSetCopy1000-8         	36437811	        40.6 ns/op
+BenchmarkWordIntSetCopy10000-8        	31056250	        37.4 ns/op
+BenchmarkMapIntSetHas100-8            	29957995	        42.6 ns/op
+BenchmarkMapIntSetHas1000-8           	31196130	        41.3 ns/op
+BenchmarkMapIntSetHas10000-8          	21513373	        48.6 ns/op
+BenchmarkMapIntSetAdd100-8            	  149082	      9055 ns/op
+BenchmarkMapIntSetAdd1000-8           	   12373	    104993 ns/op
+BenchmarkMapIntSetAdd10000-8          	    1368	    890626 ns/op
+BenchmarkMapIntSetUnionWith100-8      	  109822	     10083 ns/op
+BenchmarkMapIntSetUnionWith1000-8     	    7335	    154125 ns/op
+BenchmarkMapIntSetUnionWith10000-8    	     523	   2008290 ns/op
+BenchmarkMapIntSetCopy100-8           	  164576	      8096 ns/op
+BenchmarkMapIntSetCopy1000-8          	   12994	     98937 ns/op
+BenchmarkMapIntSetCopy10000-8         	    1318	    925960 ns/op
+PASS
+ok  	github.com/hatobus/go-training/ch11/ex11_7	35.517s
