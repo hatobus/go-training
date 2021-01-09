@@ -209,7 +209,7 @@ func (pi *interpreter) Run() {
 			if _, err = pi.printf("command \"%v\": [%v] is not expected! \"help\" command show the usage commands ", cmd, args); err != nil {
 				log.Println(err)
 			}
-			statusCode = StatusHelp
+			statusCode = StatusNotImplemented
 		}
 
 		_, err = pi.conn.Write(StatusTextln(statusCode))
