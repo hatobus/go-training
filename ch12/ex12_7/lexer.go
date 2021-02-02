@@ -81,6 +81,16 @@ func listing(lex *lexer, v reflect.Value) {
 			lex.consume(kindListEnd)
 		}
 	case reflect.Struct:
+		for !end(lex) {
+			lex.consume(kindListStart)
+			if lex.token != scanner.Ident {
+				panic("unexpected token")
+			}
+			n := lex.text()
+			lex.text()
+			read(lex, v.FieldByName(n))
+			lex.consume(kindListEnd)
+		}
 	}
 }
 
