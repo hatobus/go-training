@@ -73,9 +73,9 @@ func TestMarshallingPrettyPrint(t *testing.T) {
 (Subtitle "How I Learned to Stop Worrying and Love the Bomb")
 (Year 1964)
 (Oscars ("Best Actor (Nomin.)"
-     "Best Adapted Screenplay (Nomin.)"
-     "Best Director (Nomin.)"
-     "Best Picture (Nomin.)"))
+    "Best Adapted Screenplay (Nomin.)"
+    "Best Director (Nomin.)"
+    "Best Picture (Nomin.)"))
 (Sequel nil))`
 
 	if got != expected {
